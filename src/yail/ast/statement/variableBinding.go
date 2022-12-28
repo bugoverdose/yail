@@ -13,12 +13,12 @@ type VariableBinding struct {
 }
 
 func NewVariableBinding(keyword token.Token, name *expression.Identifier, value expression.Expression) *VariableBinding {
-	if (keyword.Type != token.VAR && keyword.Type != token.VAL) {
+	if keyword.Type != token.VAR && keyword.Type != token.VAL {
 		panic("Invalid implementation: var or val token expected.")
 	}
 	return &VariableBinding{
 		Token: keyword,
-		Name: name,
+		Name:  name,
 		Value: value,
 	}
 }
@@ -26,7 +26,7 @@ func NewVariableBinding(keyword token.Token, name *expression.Identifier, value 
 func NewVariableAssignement(name *expression.Identifier, value expression.Expression) *VariableBinding {
 	return &VariableBinding{
 		Token: token.NewKeyword(token.VAR),
-		Name: name,
+		Name:  name,
 		Value: value,
 	}
 }
@@ -34,7 +34,7 @@ func NewVariableAssignement(name *expression.Identifier, value expression.Expres
 func NewValueAssignement(name *expression.Identifier, value expression.Expression) *VariableBinding {
 	return &VariableBinding{
 		Token: token.NewKeyword(token.VAL),
-		Name: name,
+		Name:  name,
 		Value: value,
 	}
 }

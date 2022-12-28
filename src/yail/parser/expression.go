@@ -2,14 +2,14 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 	"yail/ast/expression"
 	"yail/ast/statement"
 	"yail/token"
-	"strconv"
 )
 
 const (
-	_ int = iota 
+	_ int = iota
 	NO_PREFERENCE
 )
 
@@ -22,7 +22,7 @@ var prefixParseFns = map[token.TokenType]prefixParseFn{
 
 func ParseExpressionStatement(p *Parser) *statement.ExpressionStatement {
 	stmt := statement.NewExpressionStatement(p.curToken, p.parseExpression(NO_PREFERENCE))
-    if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt

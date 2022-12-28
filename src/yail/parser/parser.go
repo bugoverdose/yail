@@ -9,7 +9,7 @@ import (
 )
 
 type Parser struct {
-	lexer      *lexer.Lexer
+	lexer  *lexer.Lexer
 	errors []string
 
 	curToken  token.Token
@@ -41,7 +41,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() statement.Statement {
-	if (p.curTokenIs(token.VAR) || p.curTokenIs(token.VAL)) {
+	if p.curTokenIs(token.VAR) || p.curTokenIs(token.VAL) {
 		return ParseVariableBindingStatement(p)
 	}
 	return ParseExpressionStatement(p)
@@ -62,7 +62,7 @@ func (p *Parser) nextTokenAndValidate(t token.TokenType) bool {
 		return true
 	}
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.curToken.Type)
-	p.errors = append(p.errors, msg)	
+	p.errors = append(p.errors, msg)
 	return false
 }
 

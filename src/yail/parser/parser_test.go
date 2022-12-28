@@ -2,11 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"testing"
 	"yail/ast/expression"
 	"yail/ast/statement"
 	"yail/lexer"
 	"yail/token"
-	"testing"
 )
 
 func TestVariableBindingStatements(t *testing.T) {
@@ -57,7 +57,7 @@ func checkParserErrors(t *testing.T, p *Parser) {
 }
 
 func testLetStatement(t *testing.T, s statement.Statement, name string) bool {
-	if (s.TokenLiteral() != token.VAR && s.TokenLiteral() != token.VAL) {
+	if s.TokenLiteral() != token.VAR && s.TokenLiteral() != token.VAL {
 		t.Errorf("s.TokenLiteral not 'let'. got=%q", s.TokenLiteral())
 		return false
 	}

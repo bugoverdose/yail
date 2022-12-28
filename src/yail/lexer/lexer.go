@@ -24,7 +24,7 @@ func (lexer *Lexer) NextToken() token.Token {
 	}
 	if IsDigit(lexer.curChar) {
 		return token.NewInteger(lexer.readNumber())
-	} 
+	}
 	return lexer.toSingleCharacterToken()
 }
 
@@ -51,14 +51,14 @@ func (lexer *Lexer) readNextChar() {
 	} else {
 		lexer.curChar = lexer.sourceCode[lexer.nextPosition]
 	}
-	lexer.curPosition = lexer.nextPosition 
+	lexer.curPosition = lexer.nextPosition
 	lexer.nextPosition += 1
 }
 
 func (lexer *Lexer) peekNextChar() byte {
 	if lexer.nextPosition >= len(lexer.sourceCode) {
 		return EOF_CHAR
-	} 
+	}
 	return lexer.sourceCode[lexer.nextPosition]
 }
 

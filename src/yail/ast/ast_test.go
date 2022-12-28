@@ -1,8 +1,8 @@
 package ast
 
 import (
-	"testing"
 	"strconv"
+	"testing"
 	"yail/ast/expression"
 	"yail/ast/statement"
 	"yail/token"

@@ -16,8 +16,8 @@ const (
 	SEMICOLON = ";"
 
 	// Keywords
-	VAR = "VARIABLE_ASSIGNMENT"
-	VAL = "VALUE_ASSIGNMENT"
+	VAR = "var"
+	VAL = "val"
 )
 
 type Token struct {
@@ -26,8 +26,8 @@ type Token struct {
 }
 
 var keywords = map[string]TokenType{
-	"var": VAR,
-	"val": VAL,
+	VAR: VAR,
+	VAL: VAL,
 }
 
 func New(tokenType TokenType, curChar byte) Token {
@@ -39,8 +39,16 @@ func NewInteger(literal string) Token {
 }
 
 func NewKeywordOrIdentifier(literal string) Token {
-	if keyword_type, ok := keywords[literal]; ok {
-		return Token{Type: keyword_type, Literal: literal}
+	if _, ok := keywords[literal]; ok {
+		return NewKeyword(literal)
 	}
+	return NewIdentifier(literal)
+}
+
+func NewKeyword(literal string) Token {
+	return Token{Type: keywords[literal], Literal: literal}
+}
+
+func NewIdentifier(literal string) Token {
 	return Token{Type: IDENTIFIER, Literal: literal}
 }

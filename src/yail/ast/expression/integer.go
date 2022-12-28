@@ -1,7 +1,6 @@
 package expression
 
 import (
-	"strconv"
 	"yail/token"
 )
 
@@ -10,13 +9,9 @@ type IntegerLiteral struct {
 	Value int64
 }
 
-func NewIntegerLiteral(literal string) *IntegerLiteral {
-	value, err := strconv.ParseInt(literal, 0, 64)
-	if err != nil {
-		return nil
-	}
+func NewIntegerLiteral(tok token.Token, value int64) *IntegerLiteral {
 	return &IntegerLiteral{
-		Token: token.NewInteger(literal),
+		Token: tok,
 		Value: value,
 	}
 }

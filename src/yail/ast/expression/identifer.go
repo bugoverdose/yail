@@ -9,10 +9,17 @@ type Identifier struct {
 	Value string
 }
 
-func NewIdentifier(value string) *Identifier {
+func NewIdentifierFrom(value string) *Identifier {
 	return &Identifier{
 		Token: token.NewIdentifier(value),
 		Value: value,
+	}
+}
+
+func NewIdentifier(tok token.Token) *Identifier {
+	return &Identifier{
+		Token: tok,
+		Value: tok.Literal,
 	}
 }
 

@@ -1,1 +1,5 @@
+# build
 src/yail/yail
+
+# Goland
+.idea/

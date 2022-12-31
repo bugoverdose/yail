@@ -6,20 +6,27 @@ import (
 	"yail/ast/expression"
 	"yail/ast/statement"
 	"yail/token"
+	"yail/utils"
 )
 
 func TestAstIntegration(t *testing.T) {
 	program := &Program{
 		Statements: []statement.Statement{
-			statement.NewVariableAssignement(expression.NewIdentifierFrom("x"), newIntegerLiteral("10")),
-			statement.NewValueAssignement(expression.NewIdentifierFrom("y"), newIntegerLiteral("20")),
+			newVariableAssignment(expression.NewIdentifierFrom("x"), newIntegerLiteral("10")),
+			newValueAssignment(expression.NewIdentifierFrom("y"), newIntegerLiteral("20")),
 			newExpressionStatement("z"),
 		},
 	}
 
-	if program.String() != "var x = 10; val y = 20; z;" {
-		t.Errorf("program.String() wrong. got=%q", program.String())
-	}
+	utils.ValidateValue(program.String(), "var x = 10; val y = 20; z;", t)
+}
+
+func newVariableAssignment(name *expression.Identifier, value expression.Expression) *statement.VariableBinding {
+	return statement.NewVariableBinding(token.NewKeyword(token.VAR), name, value)
+}
+
+func newValueAssignment(name *expression.Identifier, value expression.Expression) *statement.VariableBinding {
+	return statement.NewVariableBinding(token.NewKeyword(token.VAL), name, value)
 }
 
 func newIntegerLiteral(literal string) *expression.IntegerLiteral {

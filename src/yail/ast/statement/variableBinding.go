@@ -23,22 +23,6 @@ func NewVariableBinding(keyword token.Token, name *expression.Identifier, value 
 	}
 }
 
-func NewVariableAssignement(name *expression.Identifier, value expression.Expression) *VariableBinding {
-	return &VariableBinding{
-		Token: token.NewKeyword(token.VAR),
-		Name:  name,
-		Value: value,
-	}
-}
-
-func NewValueAssignement(name *expression.Identifier, value expression.Expression) *VariableBinding {
-	return &VariableBinding{
-		Token: token.NewKeyword(token.VAL),
-		Name:  name,
-		Value: value,
-	}
-}
-
 func (statement *VariableBinding) statementNode() {}
 
 func (statement *VariableBinding) TokenLiteral() string {

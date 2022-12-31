@@ -18,6 +18,8 @@ type prefixParseFn func(p *Parser) expression.Expression
 var prefixParseFns = map[token.TokenType]prefixParseFn{
 	token.IDENTIFIER: parseIdentifier,
 	token.INTEGER:    parseIntegerLiteral,
+	token.TRUE:       parseBoolean,
+	token.FALSE:      parseBoolean,
 }
 
 func ParseExpressionStatement(p *Parser) *statement.ExpressionStatement {
@@ -50,4 +52,8 @@ func parseIntegerLiteral(p *Parser) expression.Expression {
 		return nil
 	}
 	return expression.NewIntegerLiteral(p.curToken, value)
+}
+
+func parseBoolean(p *Parser) expression.Expression {
+	return expression.GetPooledBoolean(p.curTokenIs(token.TRUE))
 }

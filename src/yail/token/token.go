@@ -16,8 +16,10 @@ const (
 	SEMICOLON = ";"
 
 	// Keywords
-	VAR = "var"
-	VAL = "val"
+	VAR   = "var"
+	VAL   = "val"
+	TRUE  = "true"
+	FALSE = "false"
 )
 
 type Token struct {
@@ -25,9 +27,12 @@ type Token struct {
 	Literal string
 }
 
+// TODO: implement hash set if hash map is not needed
 var keywords = map[string]TokenType{
-	VAR: VAR,
-	VAL: VAL,
+	VAR:   VAR,
+	VAL:   VAL,
+	TRUE:  TRUE,
+	FALSE: FALSE,
 }
 
 func New(tokenType TokenType, curChar byte) Token {

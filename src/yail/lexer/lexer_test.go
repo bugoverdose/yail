@@ -8,7 +8,8 @@ import (
 
 func TestVariableBinding(t *testing.T) {
 	input := `var five = 5;
-    	      val ten = 10;`
+    	      val ten = 10;
+              val x = false;`
 	lexer := New(input)
 
 	tests := []struct {
@@ -25,6 +26,12 @@ func TestVariableBinding(t *testing.T) {
 		{token.IDENTIFIER, "ten"},
 		{token.ASSIGN, "="},
 		{token.INTEGER, "10"},
+		{token.SEMICOLON, ";"},
+
+		{token.VAL, "val"},
+		{token.IDENTIFIER, "x"},
+		{token.ASSIGN, "="},
+		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

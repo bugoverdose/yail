@@ -24,6 +24,21 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 }
 
+func TestEvalBooleanExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"true", true},
+		{"false", false},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testBooleanObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestVariableBindingStatements(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -66,4 +81,8 @@ func testEval(input string) object.Object {
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
 	utils.ValidateObject(obj, &object.Integer{Value: expected}, t)
+}
+
+func testBooleanObject(t *testing.T, obj object.Object, expected bool) {
+	utils.ValidateObject(obj, &object.Boolean{Value: expected}, t)
 }

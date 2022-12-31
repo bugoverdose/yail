@@ -10,6 +10,11 @@ import (
 	"yail/token"
 )
 
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
+
 func Eval(node node.Node, env *environment.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
@@ -37,6 +42,8 @@ func Eval(node node.Node, env *environment.Environment) object.Object {
 		return evalIdentifier(node, env)
 	case *expression.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+	case *expression.Boolean:
+		return getPooledBooleanObject(node.Value)
 	}
 	return nil
 }
@@ -56,4 +63,11 @@ func evalIdentifier(node *expression.Identifier, env *environment.Environment) o
 		return object.NewError("identifier not found: " + node.Value)
 	}
 	return val
+}
+
+func getPooledBooleanObject(input bool) *object.Boolean {
+	if input {
+		return TRUE
+	}
+	return FALSE
 }

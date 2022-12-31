@@ -17,6 +17,7 @@ func TestVariableBindingStatements(t *testing.T) {
 		expectedValue      interface{}
 	}{
 		{"var x = 5;", "x", 5},
+		{"val y = true", "y", true},
 		{"val a = b;", "a", "b"},
 		{"val _ = 10", "_", 10},
 	}
@@ -32,6 +33,30 @@ func TestVariableBindingStatements(t *testing.T) {
 		testVariableBindingStatement(t, stmt, tt.expectedIdentifier)
 		actualValue := stmt.(*statement.VariableBinding).Value
 		testLiteralExpression(t, actualValue, tt.expectedValue)
+	}
+}
+
+func TestBooleanExpression(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedBoolean bool
+	}{
+		{"true;", true},
+		{"false;", false},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		utils.ValidateValue(len(program.Statements), 1, t)
+		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+		utils.ValidateValue(ok, true, t)
+		boolean, ok := stmt.Expression.(*expression.Boolean)
+		utils.ValidateValue(ok, true, t)
+		utils.ValidateValue(boolean.Value, tt.expectedBoolean, t)
 	}
 }
 
@@ -65,6 +90,8 @@ func testLiteralExpression(
 		testIntegerLiteral(t, exp, int64(v))
 	case int64:
 		testIntegerLiteral(t, exp, v)
+	case bool:
+		testBooleanLiteral(t, exp, v)
 	case string:
 		testIdentifier(t, exp, v)
 	default:
@@ -77,6 +104,13 @@ func testIntegerLiteral(t *testing.T, il expression.Expression, value int64) {
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(integer.Value, value, t)
 	utils.ValidateValue(integer.TokenLiteral(), fmt.Sprintf("%d", value), t)
+}
+
+func testBooleanLiteral(t *testing.T, exp expression.Expression, value bool) {
+	boolean, ok := exp.(*expression.Boolean)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(boolean.Value, value, t)
+	utils.ValidateValue(boolean.TokenLiteral(), fmt.Sprintf("%t", value), t)
 }
 
 func testIdentifier(t *testing.T, exp expression.Expression, value string) {

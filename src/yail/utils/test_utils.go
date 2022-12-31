@@ -10,6 +10,8 @@ func ValidateObject(actual, expected object.Object, t *testing.T) {
 	switch actual := actual.(type) {
 	case *object.Integer:
 		ValidateValue(actual.Value, expected.(*object.Integer).Value, t)
+	case *object.Boolean:
+		ValidateValue(actual.Value, expected.(*object.Boolean).Value, t)
 	case *object.Error:
 		ValidateValue(actual.Message, expected.(*object.Error).Message, t)
 	}

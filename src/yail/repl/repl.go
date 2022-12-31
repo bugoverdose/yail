@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"yail/environment"
 	"yail/evaluator"
 	"yail/lexer"
-	"yail/parser"	
+	"yail/parser"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 
 func Run(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := environment.NewEnvironment()
 	for {
 		fmt.Printf(PROMPT)
 		scanned := scanner.Scan()
@@ -36,7 +38,7 @@ func Run(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
@@ -47,6 +49,6 @@ func Run(in io.Reader, out io.Writer) {
 func printParserErrors(out io.Writer, errors []string) {
 	io.WriteString(out, "Failed to execute the given source code for following reasons.\n")
 	for _, msg := range errors {
-		io.WriteString(out, "\t[ERROR] " + msg + "\n")
+		io.WriteString(out, "\t[ERROR] "+msg+"\n")
 	}
 }

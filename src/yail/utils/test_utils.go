@@ -15,6 +15,15 @@ func ValidateObject(actual, expected object.Object, t *testing.T) {
 	}
 }
 
+func ValidateMatchAnyValue[T comparable](actual T, expectedList []T, t *testing.T) {
+	for _, expected := range expectedList {
+		if actual == expected {
+			return
+		}
+	}
+	t.Errorf("expected %+v to be one of %+v", actual, expectedList)
+}
+
 func ValidateValue[T comparable](actual, expected T, t *testing.T) {
 	if actual != expected {
 		t.Errorf("expected %+v to be %+v", actual, expected)

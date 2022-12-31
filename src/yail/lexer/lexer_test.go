@@ -3,6 +3,7 @@ package lexer
 import (
 	"testing"
 	"yail/token"
+	"yail/utils"
 )
 
 func TestVariableBinding(t *testing.T) {
@@ -29,16 +30,9 @@ func TestVariableBinding(t *testing.T) {
 		{token.EOF, ""},
 	}
 
-	for idx, tt := range tests {
+	for _, tt := range tests {
 		tok := lexer.NextToken()
-
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				idx, tt.expectedType, tok.Type)
-		}
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				idx, tt.expectedLiteral, tok.Literal)
-		}
+		utils.ValidateValue(tok.Type, tt.expectedType, t)
+		utils.ValidateValue(tok.Literal, tt.expectedLiteral, t)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"yail/lexer"
 	"yail/object"
 	"yail/parser"
+	"yail/utils"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
@@ -18,8 +19,8 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		actual := testEval(tt.input)
+		testIntegerObject(t, actual, tt.expected)
 	}
 }
 
@@ -33,7 +34,8 @@ func TestVariableBindingStatements(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testIntegerObject(t, testEval(tt.input), tt.expected)
+		actual := testEval(tt.input)
+		testIntegerObject(t, actual, tt.expected)
 	}
 }
 
@@ -49,15 +51,9 @@ func TestErrorHandling(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
-		errObj, ok := evaluated.(*object.Error)
-		if !ok {
-			t.Errorf("no error object returned. got=%T(%+v)", evaluated, evaluated)
-			continue
-		}
-		if errObj.Message != tt.expectedMessage {
-			t.Errorf("wrong error message. expected=%q, got=%q", tt.expectedMessage, errObj.Message)
-		}
+		actual := testEval(tt.input)
+		expected := &object.Error{Message: tt.expectedMessage}
+		utils.ValidateObject(actual, expected, t)
 	}
 }
 
@@ -69,11 +65,5 @@ func testEval(input string) object.Object {
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
-	result, ok := obj.(*object.Integer)
-	if !ok {
-		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. got=%d, want=%d", result.Value, expected)
-	}
+	utils.ValidateObject(obj, &object.Integer{Value: expected}, t)
 }

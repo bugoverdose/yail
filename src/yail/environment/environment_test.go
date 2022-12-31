@@ -3,71 +3,56 @@ package environment
 import (
 	"testing"
 	"yail/object"
+	"yail/utils"
 )
 
 func TestGetNotFound(t *testing.T) {
 	env := NewEnvironment()
 	_, ok := env.Get("x")
-	validateValue(ok, false, t)
+	utils.ValidateValue(ok, false, t)
 }
 
 func TestImmutableAssignment(t *testing.T) {
 	env := NewEnvironment()
-	var value object.Object = object.Integer{Value: 10}
+	var value = &object.Integer{Value: 10}
 
 	assignedOk := env.ImmutableAssign("x", value)
 	obj, ok := env.Get("x")
-	reassignedOk := env.Reassign("x", object.Integer{Value: 20})
+	reassignedOk := env.Reassign("x", &object.Integer{Value: 20})
 
-	validateValue(assignedOk, true, t)
-	validateObject(obj, value, t)
-	validateValue(ok, true, t)
-	validateValue(reassignedOk, false, t)
+	utils.ValidateValue(assignedOk, true, t)
+	utils.ValidateObject(obj, value, t)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(reassignedOk, false, t)
 }
 
 func TestMutableAssignment(t *testing.T) {
 	env := NewEnvironment()
-	var value object.Object = object.Integer{Value: 10}
-	var updatedValue object.Object = object.Integer{Value: 20}
+	var value = &object.Integer{Value: 10}
+	var updatedValue = &object.Integer{Value: 20}
 
 	assignedOk := env.MutableAssign("x", value)
 	obj, getOk := env.Get("x")
-	validateValue(assignedOk, true, t)
-	validateObject(obj, value, t)
-	validateValue(getOk, true, t)
+	utils.ValidateValue(assignedOk, true, t)
+	utils.ValidateObject(obj, value, t)
+	utils.ValidateValue(getOk, true, t)
 
 	reassignedOk := env.Reassign("x", updatedValue)
 	updatedObj, updatedGetOk := env.Get("x")
-	validateValue(reassignedOk, true, t)
-	validateObject(updatedObj, updatedValue, t)
-	validateValue(updatedGetOk, true, t)
+	utils.ValidateValue(reassignedOk, true, t)
+	utils.ValidateObject(updatedObj, updatedValue, t)
+	utils.ValidateValue(updatedGetOk, true, t)
 }
 
-func TestCanNotReassignWithAssginFunctions(t *testing.T) {
+func TestCanNotReassignWithAssignFunctions(t *testing.T) {
 	env := NewEnvironment()
-	var value object.Object = object.Integer{Value: 10}
+	var value = &object.Integer{Value: 10}
 
 	assignedOk := env.MutableAssign("x", value)
-	reassignedOk := env.MutableAssign("x", object.Integer{Value: 20})
+	reassignedOk := env.MutableAssign("x", &object.Integer{Value: 20})
 	obj, _ := env.Get("x")
 
-	validateValue(assignedOk, true, t)
-	validateValue(reassignedOk, false, t)
-	validateObject(obj, value, t)
-}
-
-func validateObject(actual, expected object.Object, t *testing.T) {
-	if actual.Type() != expected.Type() {
-		t.Errorf("expected %+v to be %+v", actual, expected)
-	}
-	switch actual := actual.(type) {
-	case object.Integer:
-		validateValue(actual.Value, expected.(object.Integer).Value, t)
-	}
-}
-
-func validateValue[T comparable](actual, expected T, t *testing.T) {
-	if actual != expected {
-		t.Errorf("expected %+v to be %+v", actual, expected)
-	}
+	utils.ValidateValue(assignedOk, true, t)
+	utils.ValidateValue(reassignedOk, false, t)
+	utils.ValidateObject(obj, value, t)
 }

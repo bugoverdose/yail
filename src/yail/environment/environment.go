@@ -22,20 +22,20 @@ func (e *Environment) Get(name string) (object.Object, bool) {
 	return obj.data, ok
 }
 
-func (e *Environment) ImmutableAssign(name string, val object.Object) bool {
+func (e *Environment) ImmutableAssign(name string, val object.Object) (bool, *object.Error) {
 	if _, ok := e.dataStorage[name]; ok {
-		return false
+		return false, object.NewError("given identifier '%s' is already declared", name)
 	}
 	e.dataStorage[name] = newValue(val, false)
-	return true
+	return true, nil
 }
 
-func (e *Environment) MutableAssign(name string, val object.Object) bool {
+func (e *Environment) MutableAssign(name string, val object.Object) (bool, *object.Error) {
 	if _, ok := e.dataStorage[name]; ok {
-		return false
+		return false, object.NewError("given identifier '%s' is already declared", name)
 	}
 	e.dataStorage[name] = newValue(val, true)
-	return true
+	return true, nil
 }
 
 func (e *Environment) Reassign(name string, val object.Object) (bool, *object.Error) {

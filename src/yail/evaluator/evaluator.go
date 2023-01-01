@@ -27,17 +27,20 @@ func Eval(node node.Node, env *environment.Environment) object.Object {
 		val := Eval(node.Value, env)
 		// TODO: 할당하려는 우항 평가에서 문제 있는 경우에 대한 예외 처리 추가
 		var ok bool
+		var err *object.Error
 		if node.Token.Type == token.VAL {
-			ok = env.ImmutableAssign(node.Name.Value, val)
+			ok, err = env.ImmutableAssign(node.Name.Value, val)
 		}
 		if node.Token.Type == token.VAR {
-			ok = env.MutableAssign(node.Name.Value, val)
+			ok, err = env.MutableAssign(node.Name.Value, val)
 		}
 		if !ok {
-			return nil // TODO: 예외처리 로직 제대로 추가
+			return err
 		}
+		return nil
 	case *statement.Reassignment:
 		val := Eval(node.Value, env)
+		// TODO: 할당하려는 우항 평가에서 문제 있는 경우에 대한 예외 처리 추가
 		ok, err := env.Reassign(node.Name.Value, val)
 		if !ok {
 			return err

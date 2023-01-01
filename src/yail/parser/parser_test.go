@@ -60,7 +60,7 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
-func TestParsingPrefixExpressions(t *testing.T) {
+func TestPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
 		input    string
 		operator string
@@ -87,6 +87,44 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		utils.ValidateValue(ok, true, t)
 		utils.ValidateValue(expr.Operator, tt.operator, t)
 		testLiteralExpression(t, expr.RightNode, tt.value)
+	}
+}
+
+func TestInfixExpressions(t *testing.T) {
+	infixTests := []struct {
+		input      string
+		leftValue  interface{}
+		operator   string
+		rightValue interface{}
+	}{
+		{"5 + 5;", 5, "+", 5},
+		{"5 - 5;", 5, "-", 5},
+		{"5 * 5;", 5, "*", 5},
+		{"5 / 5;", 5, "/", 5},
+		{"5 > 5;", 5, ">", 5},
+		{"5 < 5;", 5, "<", 5},
+		{"x + y;", "x", "+", "y"},
+		{"x - y;", "x", "-", "y"},
+		{"x * y;", "x", "*", "y"},
+		{"x / y;", "x", "/", "y"},
+		{"x > y;", "x", ">", "y"},
+		{"x < y;", "x", "<", "y"},
+	}
+
+	for _, tt := range infixTests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		utils.ValidateValue(len(program.Statements), 1, t)
+		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+		utils.ValidateValue(ok, true, t)
+		expr, ok := stmt.Expression.(*expression.Infix)
+		utils.ValidateValue(ok, true, t)
+		utils.ValidateValue(expr.Operator, tt.operator, t)
+		testLiteralExpression(t, expr.LeftNode, tt.leftValue)
+		testLiteralExpression(t, expr.RightNode, tt.rightValue)
 	}
 }
 

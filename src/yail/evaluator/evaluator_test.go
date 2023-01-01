@@ -18,6 +18,11 @@ func TestEvalIntegerExpression(t *testing.T) {
 		{"15", 15},
 		{"-10", -10},
 		{"-0", 0},
+		{"1 + 2", 3},
+		{"1 - 2", -1},
+		{"1 + 2 * 3", 7},
+		{"1 + 3 / 2", 2},
+		{"1 + 10 % 4", 3},
 	}
 
 	for _, tt := range tests {
@@ -35,6 +40,10 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"false", false},
 		{"!true", false},
 		{"!false", true},
+		{"10 > 5", true},
+		{"10 < 5", false},
+		{"5 < 5", false},
+		{"5 < 5", false},
 	}
 
 	for _, tt := range tests {
@@ -83,7 +92,7 @@ func TestErrorHandling(t *testing.T) {
 			"identifier not found: x",
 		},
 		{
-			"val a = 5; a = b;",
+			"val a = 5; a = 10;",
 			"can not reassign variables declared with 'val'",
 		},
 	}

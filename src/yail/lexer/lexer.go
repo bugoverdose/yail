@@ -31,12 +31,24 @@ func (lexer *Lexer) NextToken() token.Token {
 func (lexer *Lexer) toSingleCharacterToken() token.Token {
 	var curToken token.Token
 	switch lexer.curChar {
-	case '-':
-		curToken = token.New(token.MINUS, lexer.curChar)
-	case '!':
-		curToken = token.New(token.NOT, lexer.curChar)
 	case '=':
 		curToken = token.New(token.ASSIGN, lexer.curChar)
+	case '!':
+		curToken = token.New(token.NOT, lexer.curChar)
+	case '+':
+		curToken = token.New(token.PLUS, lexer.curChar)
+	case '-':
+		curToken = token.New(token.MINUS, lexer.curChar)
+	case '*':
+		curToken = token.New(token.MULTIPLY, lexer.curChar)
+	case '/':
+		curToken = token.New(token.DIVIDE, lexer.curChar)
+	case '%':
+		curToken = token.New(token.MODULO, lexer.curChar)
+	case '<':
+		curToken = token.New(token.LESS_THAN, lexer.curChar)
+	case '>':
+		curToken = token.New(token.GREATER_THAN, lexer.curChar)
 	case ';':
 		curToken = token.New(token.SEMICOLON, lexer.curChar)
 	case EOF_CHAR:

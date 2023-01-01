@@ -10,9 +10,15 @@ const (
 	INTEGER    = "INTEGER_LITERAL" // 1, 2, 10, ...
 
 	// Operators
-	ASSIGN = "="
-	MINUS  = "-"
-	NOT    = "!"
+	ASSIGN       = "="
+	NOT          = "!"
+	PLUS         = "+"
+	MINUS        = "-"
+	MULTIPLY     = "*"
+	DIVIDE       = "/"
+	MODULO       = "%"
+	LESS_THAN    = "<"
+	GREATER_THAN = ">"
 
 	// Delimiters
 	SEMICOLON = ";"
@@ -35,8 +41,6 @@ var keywords = map[string]TokenType{
 	VAL:   VAL,
 	TRUE:  TRUE,
 	FALSE: FALSE,
-	NOT:   NOT,
-	MINUS: MINUS,
 }
 
 func New(tokenType TokenType, curChar byte) Token {

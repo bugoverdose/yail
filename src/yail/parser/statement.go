@@ -22,7 +22,7 @@ func parseVariableBindingStatement(p *Parser) *statement.VariableBinding {
 	}
 
 	p.nextToken()
-	value := p.parseExpression(NO_PREFERENCE)
+	value := p.parseExpression(NO_PRIORITY)
 
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil
@@ -46,7 +46,7 @@ func parseReassignmentStatement(p *Parser) *statement.Reassignment {
 	}
 
 	p.nextToken()
-	value := p.parseExpression(NO_PREFERENCE)
+	value := p.parseExpression(NO_PRIORITY)
 
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil

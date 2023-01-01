@@ -44,24 +44,42 @@ func TestVariableBinding(t *testing.T) {
 	}
 }
 
-func TestExpressionStatement(t *testing.T) {
-	input := `x;
-    	      !true;
-              -10;`
+func TestOperators(t *testing.T) {
+	input := `!true;
+              1 + 2 - 3 * 10 / 2 % 3;
+			  -10 < 5;
+			  5 > 10;`
 	lexer := New(input)
 
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-		{token.IDENTIFIER, "x"},
-		{token.SEMICOLON, ";"},
-
 		{token.NOT, "!"},
 		{token.TRUE, "true"},
 		{token.SEMICOLON, ";"},
 
+		{token.INTEGER, "1"},
+		{token.PLUS, "+"},
+		{token.INTEGER, "2"},
 		{token.MINUS, "-"},
+		{token.INTEGER, "3"},
+		{token.MULTIPLY, "*"},
+		{token.INTEGER, "10"},
+		{token.DIVIDE, "/"},
+		{token.INTEGER, "2"},
+		{token.MODULO, "%"},
+		{token.INTEGER, "3"},
+		{token.SEMICOLON, ";"},
+
+		{token.MINUS, "-"},
+		{token.INTEGER, "10"},
+		{token.LESS_THAN, "<"},
+		{token.INTEGER, "5"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "5"},
+		{token.GREATER_THAN, ">"},
 		{token.INTEGER, "10"},
 		{token.SEMICOLON, ";"},
 

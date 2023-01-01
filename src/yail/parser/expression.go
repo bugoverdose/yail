@@ -9,12 +9,27 @@ import (
 )
 
 const (
-	_ int = iota
-	NO_PREFERENCE
-	PREFIX_PREFERENCE
+	NO_PRIORITY         int = iota
+	COMPARISON_PRIORITY     // > or <
+	SUM_SUBTRACT_PRIORITY
+	PROD_DIV_PRIORITY
+	PREFIX_PRIORITY
 )
 
-type nullDenotation func(p *Parser) expression.Expression
+var priorities = map[token.TokenType]int{
+	token.PLUS:         SUM_SUBTRACT_PRIORITY,
+	token.MINUS:        SUM_SUBTRACT_PRIORITY,
+	token.MULTIPLY:     PROD_DIV_PRIORITY,
+	token.DIVIDE:       PROD_DIV_PRIORITY,
+	token.MODULO:       PROD_DIV_PRIORITY,
+	token.LESS_THAN:    COMPARISON_PRIORITY,
+	token.GREATER_THAN: COMPARISON_PRIORITY,
+}
+
+type (
+	nullDenotation func(p *Parser) expression.Expression
+	leftDenotation func(e expression.Expression, p *Parser) expression.Expression
+)
 
 func (p *Parser) initNullDenotations() {
 	p.nuds = map[token.TokenType]nullDenotation{
@@ -27,22 +42,59 @@ func (p *Parser) initNullDenotations() {
 	}
 }
 
+func (p *Parser) initLeftDenotations() {
+	p.leds = map[token.TokenType]leftDenotation{
+		token.PLUS:         parseInfixExpression,
+		token.MINUS:        parseInfixExpression,
+		token.MULTIPLY:     parseInfixExpression,
+		token.DIVIDE:       parseInfixExpression,
+		token.MODULO:       parseInfixExpression,
+		token.LESS_THAN:    parseInfixExpression,
+		token.GREATER_THAN: parseInfixExpression,
+	}
+}
+
 func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
-	stmt := statement.NewExpressionStatement(p.curToken, p.parseExpression(NO_PREFERENCE))
+	stmt := statement.NewExpressionStatement(p.curToken, p.parseExpression(NO_PRIORITY))
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
 }
 
-func (p *Parser) parseExpression(precedence int) expression.Expression {
+func (p *Parser) parseExpression(priority int) expression.Expression {
 	nud := p.nuds[p.curToken.Type]
 	if nud == nil {
 		msg := fmt.Sprintf("no parse function for %s found", p.curToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
-	return nud(p)
+	leftExp := nud(p)
+
+	for !p.peekTokenIs(token.SEMICOLON) && priority < p.getNextTokenPriority() {
+		infix := p.leds[p.peekToken.Type]
+		if infix == nil {
+			return leftExp
+		}
+		p.nextToken()
+		leftExp = infix(leftExp, p)
+	}
+
+	return leftExp
+}
+
+func (p *Parser) getCurTokenPriority() int {
+	if p, ok := priorities[p.curToken.Type]; ok {
+		return p
+	}
+	return NO_PRIORITY
+}
+
+func (p *Parser) getNextTokenPriority() int {
+	if p, ok := priorities[p.peekToken.Type]; ok {
+		return p
+	}
+	return NO_PRIORITY
 }
 
 func parseIdentifier(p *Parser) expression.Expression {
@@ -66,6 +118,14 @@ func parseBoolean(p *Parser) expression.Expression {
 func parsePrefixExpression(p *Parser) expression.Expression {
 	prefixToken := p.curToken
 	p.nextToken()
-	rightNode := p.parseExpression(PREFIX_PREFERENCE)
+	rightNode := p.parseExpression(PREFIX_PRIORITY)
 	return expression.NewPrefix(prefixToken, rightNode)
+}
+
+func parseInfixExpression(leftNode expression.Expression, p *Parser) expression.Expression {
+	infixToken := p.curToken
+	priority := p.getCurTokenPriority()
+	p.nextToken()
+	rightNode := p.parseExpression(priority)
+	return expression.NewInfix(leftNode, infixToken, rightNode)
 }

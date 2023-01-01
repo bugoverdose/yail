@@ -16,6 +16,7 @@ type Parser struct {
 	peekToken token.Token
 
 	nuds map[token.TokenType]nullDenotation
+	leds map[token.TokenType]leftDenotation
 }
 
 func New(lexer *lexer.Lexer) *Parser {
@@ -24,6 +25,7 @@ func New(lexer *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 	p.initNullDenotations()
+	p.initLeftDenotations()
 	p.curToken = p.lexer.NextToken()
 	p.peekToken = p.lexer.NextToken()
 	return p

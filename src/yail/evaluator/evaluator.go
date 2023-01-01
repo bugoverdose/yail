@@ -29,3 +29,10 @@ func evalProgram(program *ast.Program, env *environment.Environment) object.Obje
 	}
 	return result
 }
+
+func isError(obj object.Object) bool {
+	if obj != nil {
+		return obj.Type() == object.ERROR_OBJ
+	}
+	return false
+}

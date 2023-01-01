@@ -20,9 +20,7 @@ func evalExpression(node expression.Expression, env *environment.Environment) ob
 	case *expression.Boolean:
 		return getPooledBooleanObject(node.Value)
 	case *expression.Prefix:
-		right := Eval(node.RightNode, env)
-		// TODO: 할당하려는 우항 평가에서 문제 있는 경우에 대한 예외 처리 추가
-		return evalPrefixExpression(node.Operator, right)
+		return evalPrefixExpression(node, env)
 	}
 	return nil
 }
@@ -42,14 +40,18 @@ func getPooledBooleanObject(input bool) *object.Boolean {
 	return FALSE
 }
 
-func evalPrefixExpression(operator string, right object.Object) object.Object {
-	switch operator {
+func evalPrefixExpression(node *expression.Prefix, env *environment.Environment) object.Object {
+	right := Eval(node.RightNode, env)
+	if isError(right) {
+		return right
+	}
+	switch node.Operator {
 	case "!":
 		return evalNotOperatorExpression(right)
 	case "-":
 		return evalNegativePrefixOperatorExpression(right)
 	default:
-		return object.NewError("unknown operator: %s%s", operator, right.Type())
+		return object.NewError("unknown operator: %s%s", node.Operator, right.Type())
 	}
 }
 

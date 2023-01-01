@@ -13,9 +13,9 @@ const (
 	NO_PREFERENCE
 )
 
-type prefixParseFn func(p *Parser) expression.Expression
+type nullDenotation func(p *Parser) expression.Expression
 
-var prefixParseFns = map[token.TokenType]prefixParseFn{
+var nullDenotations = map[token.TokenType]nullDenotation{
 	token.IDENTIFIER: parseIdentifier,
 	token.INTEGER:    parseIntegerLiteral,
 	token.TRUE:       parseBoolean,
@@ -31,9 +31,9 @@ func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
 }
 
 func (p *Parser) parseExpression(precedence int) expression.Expression {
-	prefix := prefixParseFns[p.curToken.Type]
+	prefix := nullDenotations[p.curToken.Type]
 	if prefix == nil {
-		msg := fmt.Sprintf("no prefix parse function for %s found", p.curToken.Type)
+		msg := fmt.Sprintf("no parse function for %s found", p.curToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}

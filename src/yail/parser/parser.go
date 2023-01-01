@@ -64,7 +64,7 @@ func (p *Parser) nextTokenAndValidate(t token.TokenType) bool {
 	if p.curTokenIs(t) {
 		return true
 	}
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.curToken.Type)
+	msg := fmt.Sprintf("missing token: %s", t)
 	p.errors = append(p.errors, msg)
 	return false
 }

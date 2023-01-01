@@ -41,10 +41,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() statement.Statement {
-	if p.curTokenIs(token.VAR) || p.curTokenIs(token.VAL) {
+	if isVariableBindingStatement(p) {
 		return parseVariableBindingStatement(p)
 	}
-	if p.curTokenIs(token.IDENTIFIER) && p.peekTokenIs(token.ASSIGN) {
+	if isReassignmentStatement(p) {
 		return parseReassignmentStatement(p)
 	}
 	return parseExpressionStatement(p)

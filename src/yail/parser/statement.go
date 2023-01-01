@@ -6,6 +6,10 @@ import (
 	"yail/token"
 )
 
+func isVariableBindingStatement(p *Parser) bool {
+	return p.curTokenIs(token.VAR) || p.curTokenIs(token.VAL)
+}
+
 func parseVariableBindingStatement(p *Parser) *statement.VariableBinding {
 	curToken := p.curToken
 	if !p.nextTokenAndValidate(token.IDENTIFIER) {
@@ -20,10 +24,14 @@ func parseVariableBindingStatement(p *Parser) *statement.VariableBinding {
 	p.nextToken()
 	value := p.parseExpression(NO_PREFERENCE)
 
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
+	if !p.nextTokenAndValidate(token.SEMICOLON) {
+		return nil
 	}
 	return statement.NewVariableBinding(curToken, name, value)
+}
+
+func isReassignmentStatement(p *Parser) bool {
+	return p.curTokenIs(token.IDENTIFIER) && p.peekTokenIs(token.ASSIGN)
 }
 
 func parseReassignmentStatement(p *Parser) *statement.Reassignment {
@@ -40,8 +48,8 @@ func parseReassignmentStatement(p *Parser) *statement.Reassignment {
 	p.nextToken()
 	value := p.parseExpression(NO_PREFERENCE)
 
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
+	if !p.nextTokenAndValidate(token.SEMICOLON) {
+		return nil
 	}
 	return statement.NewReassignment(curToken, name, value)
 }

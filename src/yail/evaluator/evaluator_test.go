@@ -54,6 +54,21 @@ func TestVariableBindingStatements(t *testing.T) {
 	}
 }
 
+func TestReassignmentStatements(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"var a = 5; a = 10; a;", 10},
+		{"var a = 5; val b = 15; a = b; a", 15},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(tt.input)
+		testIntegerObject(t, actual, tt.expected)
+	}
+}
+
 func TestErrorHandling(t *testing.T) {
 	tests := []struct {
 		input           string
@@ -62,6 +77,10 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"x",
 			"identifier not found: x",
+		},
+		{
+			"val a = 5; a = b;",
+			"can not reassign variables declared with 'val'",
 		},
 	}
 

@@ -18,12 +18,13 @@ func TestImmutableAssignment(t *testing.T) {
 
 	assignedOk := env.ImmutableAssign("x", value)
 	obj, ok := env.Get("x")
-	reassignedOk := env.Reassign("x", &object.Integer{Value: 20})
+	reassignedOk, err := env.Reassign("x", &object.Integer{Value: 20})
 
 	utils.ValidateValue(assignedOk, true, t)
 	utils.ValidateObject(obj, value, t)
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(reassignedOk, false, t)
+	utils.ValidateValue(err.Message, "can not reassign variables declared with 'val'", t)
 }
 
 func TestMutableAssignment(t *testing.T) {
@@ -37,9 +38,10 @@ func TestMutableAssignment(t *testing.T) {
 	utils.ValidateObject(obj, value, t)
 	utils.ValidateValue(getOk, true, t)
 
-	reassignedOk := env.Reassign("x", updatedValue)
+	reassignedOk, err := env.Reassign("x", updatedValue)
 	updatedObj, updatedGetOk := env.Get("x")
 	utils.ValidateValue(reassignedOk, true, t)
+	utils.ValidateValue(err, nil, t)
 	utils.ValidateObject(updatedObj, updatedValue, t)
 	utils.ValidateValue(updatedGetOk, true, t)
 }

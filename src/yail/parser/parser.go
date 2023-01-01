@@ -42,9 +42,12 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() statement.Statement {
 	if p.curTokenIs(token.VAR) || p.curTokenIs(token.VAL) {
-		return ParseVariableBindingStatement(p)
+		return parseVariableBindingStatement(p)
 	}
-	return ParseExpressionStatement(p)
+	if p.curTokenIs(token.IDENTIFIER) && p.peekTokenIs(token.ASSIGN) {
+		return parseReassignmentStatement(p)
+	}
+	return parseExpressionStatement(p)
 }
 
 func (p *Parser) Errors() []string {

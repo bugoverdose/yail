@@ -22,7 +22,7 @@ var prefixParseFns = map[token.TokenType]prefixParseFn{
 	token.FALSE:      parseBoolean,
 }
 
-func ParseExpressionStatement(p *Parser) *statement.ExpressionStatement {
+func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
 	stmt := statement.NewExpressionStatement(p.curToken, p.parseExpression(NO_PREFERENCE))
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()

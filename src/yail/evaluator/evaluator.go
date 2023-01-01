@@ -36,6 +36,13 @@ func Eval(node node.Node, env *environment.Environment) object.Object {
 		if !ok {
 			return nil // TODO: 예외처리 로직 제대로 추가
 		}
+	case *statement.Reassignment:
+		val := Eval(node.Value, env)
+		ok, err := env.Reassign(node.Name.Value, val)
+		if !ok {
+			return err
+		}
+		return nil
 
 	// TODO: Expression 노드인지 체크하고 별도로 분기
 	case *expression.Identifier:

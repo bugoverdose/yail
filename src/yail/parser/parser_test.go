@@ -17,9 +17,9 @@ func TestVariableBindingStatements(t *testing.T) {
 		expectedValue      interface{}
 	}{
 		{"var x = 5;", "x", 5},
-		{"val y = true", "y", true},
+		{"val y = true;", "y", true},
 		{"val a = b;", "a", "b"},
-		{"val _ = 10", "_", 10},
+		{"val _ = 10;", "_", 10},
 	}
 
 	for _, tt := range tests {
@@ -57,6 +57,36 @@ func TestBooleanExpression(t *testing.T) {
 		boolean, ok := stmt.Expression.(*expression.Boolean)
 		utils.ValidateValue(ok, true, t)
 		utils.ValidateValue(boolean.Value, tt.expectedBoolean, t)
+	}
+}
+
+func TestParsingPrefixExpressions(t *testing.T) {
+	prefixTests := []struct {
+		input    string
+		operator string
+		value    interface{}
+	}{
+		{"!5;", "!", 5},
+		{"-15", "-", 15},
+		{"!foobar", "!", "foobar"},
+		{"-foobar;", "-", "foobar"},
+		{"!true;", "!", true},
+		{"!false;", "!", false},
+	}
+
+	for _, tt := range prefixTests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		utils.ValidateValue(len(program.Statements), 1, t)
+		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+		utils.ValidateValue(ok, true, t)
+		expr, ok := stmt.Expression.(*expression.Prefix)
+		utils.ValidateValue(ok, true, t)
+		utils.ValidateValue(expr.Operator, tt.operator, t)
+		testLiteralExpression(t, expr.RightNode, tt.value)
 	}
 }
 

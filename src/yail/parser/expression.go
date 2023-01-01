@@ -11,15 +11,20 @@ import (
 const (
 	_ int = iota
 	NO_PREFERENCE
+	PREFIX_PREFERENCE
 )
 
 type nullDenotation func(p *Parser) expression.Expression
 
-var nullDenotations = map[token.TokenType]nullDenotation{
-	token.IDENTIFIER: parseIdentifier,
-	token.INTEGER:    parseIntegerLiteral,
-	token.TRUE:       parseBoolean,
-	token.FALSE:      parseBoolean,
+func (p *Parser) initNullDenotations() {
+	p.nuds = map[token.TokenType]nullDenotation{
+		token.IDENTIFIER: parseIdentifier,
+		token.INTEGER:    parseIntegerLiteral,
+		token.TRUE:       parseBoolean,
+		token.FALSE:      parseBoolean,
+		token.NOT:        parsePrefixExpression,
+		token.MINUS:      parsePrefixExpression,
+	}
 }
 
 func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
@@ -31,13 +36,13 @@ func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
 }
 
 func (p *Parser) parseExpression(precedence int) expression.Expression {
-	prefix := nullDenotations[p.curToken.Type]
-	if prefix == nil {
+	nud := p.nuds[p.curToken.Type]
+	if nud == nil {
 		msg := fmt.Sprintf("no parse function for %s found", p.curToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
-	return prefix(p)
+	return nud(p)
 }
 
 func parseIdentifier(p *Parser) expression.Expression {
@@ -56,4 +61,11 @@ func parseIntegerLiteral(p *Parser) expression.Expression {
 
 func parseBoolean(p *Parser) expression.Expression {
 	return expression.GetPooledBoolean(p.curTokenIs(token.TRUE))
+}
+
+func parsePrefixExpression(p *Parser) expression.Expression {
+	prefixToken := p.curToken
+	p.nextToken()
+	rightNode := p.parseExpression(PREFIX_PREFERENCE)
+	return expression.NewPrefix(prefixToken, rightNode)
 }

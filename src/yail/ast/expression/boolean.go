@@ -21,12 +21,12 @@ func GetPooledBoolean(value bool) *Boolean {
 	return &FALSE
 }
 
-func (il *Boolean) expressionNode() {}
+func (b *Boolean) expressionNode() {}
 
-func (il *Boolean) TokenLiteral() string {
-	return il.Token.Literal
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
 }
 
-func (il *Boolean) String() string {
-	return il.Token.Literal
+func (b *Boolean) String() string {
+	return b.Token.Literal
 }

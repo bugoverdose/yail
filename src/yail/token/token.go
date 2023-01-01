@@ -11,6 +11,8 @@ const (
 
 	// Operators
 	ASSIGN = "="
+	MINUS  = "-"
+	NOT    = "!"
 
 	// Delimiters
 	SEMICOLON = ";"
@@ -33,6 +35,8 @@ var keywords = map[string]TokenType{
 	VAL:   VAL,
 	TRUE:  TRUE,
 	FALSE: FALSE,
+	NOT:   NOT,
+	MINUS: MINUS,
 }
 
 func New(tokenType TokenType, curChar byte) Token {

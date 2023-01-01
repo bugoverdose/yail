@@ -31,6 +31,10 @@ func (lexer *Lexer) NextToken() token.Token {
 func (lexer *Lexer) toSingleCharacterToken() token.Token {
 	var curToken token.Token
 	switch lexer.curChar {
+	case '-':
+		curToken = token.New(token.MINUS, lexer.curChar)
+	case '!':
+		curToken = token.New(token.NOT, lexer.curChar)
 	case '=':
 		curToken = token.New(token.ASSIGN, lexer.curChar)
 	case ';':

@@ -14,11 +14,11 @@ func TestGetNotFound(t *testing.T) {
 
 func TestImmutableAssignment(t *testing.T) {
 	env := NewEnvironment()
-	var value = &object.Integer{Value: 10}
+	var value = object.NewInteger(10)
 
 	assignedOk, assignErr := env.ImmutableAssign("x", value)
 	obj, ok := env.Get("x")
-	reassignedOk, err := env.Reassign("x", &object.Integer{Value: 20})
+	reassignedOk, err := env.Reassign("x", object.NewInteger(20))
 
 	utils.ValidateValue(assignedOk, true, t)
 	utils.ValidateValue(assignErr, nil, t)
@@ -30,8 +30,8 @@ func TestImmutableAssignment(t *testing.T) {
 
 func TestMutableAssignment(t *testing.T) {
 	env := NewEnvironment()
-	var value = &object.Integer{Value: 10}
-	var updatedValue = &object.Integer{Value: 20}
+	var value = object.NewInteger(10)
+	var updatedValue = object.NewInteger(20)
 
 	assignedOk, assignErr := env.MutableAssign("x", value)
 	obj, getOk := env.Get("x")
@@ -50,10 +50,10 @@ func TestMutableAssignment(t *testing.T) {
 
 func TestCanNotReassignWithAssignFunctions(t *testing.T) {
 	env := NewEnvironment()
-	var value = &object.Integer{Value: 10}
+	var value = object.NewInteger(10)
 
 	assignedOk, assignErr := env.MutableAssign("x", value)
-	reassignedOk, err := env.MutableAssign("x", &object.Integer{Value: 20})
+	reassignedOk, err := env.MutableAssign("x", object.NewInteger(20))
 	obj, _ := env.Get("x")
 
 	utils.ValidateValue(assignedOk, true, t)

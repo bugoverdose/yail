@@ -51,7 +51,7 @@ func Eval(node node.Node, env *environment.Environment) object.Object {
 	case *expression.Identifier:
 		return evalIdentifier(node, env)
 	case *expression.IntegerLiteral:
-		return &object.Integer{Value: node.Value}
+		return object.NewInteger(node.Value)
 	case *expression.Boolean:
 		return getPooledBooleanObject(node.Value)
 	}

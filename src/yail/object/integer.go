@@ -8,6 +8,10 @@ type Integer struct {
 	Value int64
 }
 
+func NewInteger(value int64) *Integer {
+	return &Integer{Value: value}
+}
+
 func (i *Integer) Type() ObjectType {
 	return INTEGER_OBJ
 }

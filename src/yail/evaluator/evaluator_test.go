@@ -99,7 +99,7 @@ func testEval(input string) object.Object {
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
-	utils.ValidateObject(obj, &object.Integer{Value: expected}, t)
+	utils.ValidateObject(obj, object.NewInteger(expected), t)
 }
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) {

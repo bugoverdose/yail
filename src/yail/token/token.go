@@ -10,15 +10,19 @@ const (
 	INTEGER    = "INTEGER_LITERAL" // 1, 2, 10, ...
 
 	// Operators
-	ASSIGN       = "="
-	NOT          = "!"
-	PLUS         = "+"
-	MINUS        = "-"
-	MULTIPLY     = "*"
-	DIVIDE       = "/"
-	MODULO       = "%"
-	LESS_THAN    = "<"
-	GREATER_THAN = ">"
+	ASSIGN           = "="
+	NOT              = "!"
+	PLUS             = "+"
+	MINUS            = "-"
+	MULTIPLY         = "*"
+	DIVIDE           = "/"
+	MODULO           = "%"
+	LESS_THAN        = "<"
+	GREATER_THAN     = ">"
+	EQUAL            = "=="
+	NOT_EQUAL        = "!="
+	LESS_OR_EQUAL    = "<="
+	GREATER_OR_EQUAL = ">="
 
 	// Delimiters
 	SEMICOLON = ";"
@@ -35,16 +39,40 @@ type Token struct {
 	Literal string
 }
 
-// TODO: implement hash set if hash map is not needed
-var keywords = map[string]TokenType{
-	VAR:   VAR,
-	VAL:   VAL,
-	TRUE:  TRUE,
-	FALSE: FALSE,
+var (
+	ILLEGAL_TOKEN = New(ILLEGAL)
+	EOF_TOKEN     = Token{Type: EOF, Literal: ""}
+)
+
+var keywords = map[string]Token{
+	VAR:   New(VAR),
+	VAL:   New(VAL),
+	TRUE:  New(TRUE),
+	FALSE: New(FALSE),
 }
 
-func New(tokenType TokenType, curChar byte) Token {
-	return Token{Type: tokenType, Literal: string(curChar)}
+var SingleCharacterTokens = map[string]Token{
+	ASSIGN:       New(ASSIGN),
+	NOT:          New(NOT),
+	PLUS:         New(PLUS),
+	MINUS:        New(MINUS),
+	MULTIPLY:     New(MULTIPLY),
+	DIVIDE:       New(DIVIDE),
+	MODULO:       New(MODULO),
+	LESS_THAN:    New(LESS_THAN),
+	GREATER_THAN: New(GREATER_THAN),
+	SEMICOLON:    New(SEMICOLON),
+}
+
+var TwoCharacterTokens = map[string]Token{
+	EQUAL:            New(EQUAL),
+	NOT_EQUAL:        New(NOT_EQUAL),
+	LESS_OR_EQUAL:    New(LESS_OR_EQUAL),
+	GREATER_OR_EQUAL: New(GREATER_OR_EQUAL),
+}
+
+func New(tokenType TokenType) Token {
+	return Token{Type: tokenType, Literal: string(tokenType)}
 }
 
 func NewInteger(literal string) Token {
@@ -52,14 +80,10 @@ func NewInteger(literal string) Token {
 }
 
 func NewKeywordOrIdentifier(literal string) Token {
-	if _, ok := keywords[literal]; ok {
-		return NewKeyword(literal)
+	if tok, ok := keywords[literal]; ok {
+		return tok
 	}
 	return NewIdentifier(literal)
-}
-
-func NewKeyword(literal string) Token {
-	return Token{Type: keywords[literal], Literal: literal}
 }
 
 func NewIdentifier(literal string) Token {

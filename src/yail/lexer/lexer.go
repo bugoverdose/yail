@@ -19,46 +19,42 @@ func New(sourceCode string) *Lexer {
 
 func (lexer *Lexer) NextToken() token.Token {
 	lexer.eatWhitespace()
+	if lexer.curChar == EOF_CHAR {
+		return token.EOF_TOKEN
+	}
 	if IsLetter(lexer.curChar) {
 		return token.NewKeywordOrIdentifier(lexer.readConsecutiveLetters())
 	}
 	if IsDigit(lexer.curChar) {
 		return token.NewInteger(lexer.readNumber())
 	}
-	return lexer.toSingleCharacterToken()
+	return lexer.toSpecialCharacterToken()
 }
 
-func (lexer *Lexer) toSingleCharacterToken() token.Token {
-	var curToken token.Token
-	switch lexer.curChar {
-	case '=':
-		curToken = token.New(token.ASSIGN, lexer.curChar)
-	case '!':
-		curToken = token.New(token.NOT, lexer.curChar)
-	case '+':
-		curToken = token.New(token.PLUS, lexer.curChar)
-	case '-':
-		curToken = token.New(token.MINUS, lexer.curChar)
-	case '*':
-		curToken = token.New(token.MULTIPLY, lexer.curChar)
-	case '/':
-		curToken = token.New(token.DIVIDE, lexer.curChar)
-	case '%':
-		curToken = token.New(token.MODULO, lexer.curChar)
-	case '<':
-		curToken = token.New(token.LESS_THAN, lexer.curChar)
-	case '>':
-		curToken = token.New(token.GREATER_THAN, lexer.curChar)
-	case ';':
-		curToken = token.New(token.SEMICOLON, lexer.curChar)
-	case EOF_CHAR:
-		curToken.Literal = ""
-		curToken.Type = token.EOF
-	default:
-		curToken = token.New(token.ILLEGAL, lexer.curChar)
+func (lexer *Lexer) toSpecialCharacterToken() token.Token {
+	if tok, ok := lexer.getTwoCharacterToken(); ok {
+		lexer.readNextChar()
+		lexer.readNextChar()
+		return tok
 	}
+	tok, ok := token.SingleCharacterTokens[string(lexer.curChar)]
 	lexer.readNextChar()
-	return curToken
+	if !ok {
+		return token.ILLEGAL_TOKEN
+	}
+	return tok
+}
+
+func (lexer *Lexer) getTwoCharacterToken() (token.Token, bool) {
+	if lexer.nextPosition >= len(lexer.sourceCode) {
+		return token.ILLEGAL_TOKEN, false
+	}
+	chars := string(lexer.curChar) + string(lexer.sourceCode[lexer.nextPosition])
+	tok, ok := token.TwoCharacterTokens[chars]
+	if !ok {
+		return token.ILLEGAL_TOKEN, false
+	}
+	return tok, true
 }
 
 func (lexer *Lexer) readNextChar() {
@@ -69,13 +65,6 @@ func (lexer *Lexer) readNextChar() {
 	}
 	lexer.curPosition = lexer.nextPosition
 	lexer.nextPosition += 1
-}
-
-func (lexer *Lexer) peekNextChar() byte {
-	if lexer.nextPosition >= len(lexer.sourceCode) {
-		return EOF_CHAR
-	}
-	return lexer.sourceCode[lexer.nextPosition]
 }
 
 func (lexer *Lexer) eatWhitespace() {

@@ -44,7 +44,7 @@ func TestVariableBinding(t *testing.T) {
 	}
 }
 
-func TestOperators(t *testing.T) {
+func TestSingleCharacterToken(t *testing.T) {
 	input := `!true;
               1 + 2 - 3 * 10 / 2 % 3;
 			  -10 < 5;
@@ -81,6 +81,47 @@ func TestOperators(t *testing.T) {
 		{token.INTEGER, "5"},
 		{token.GREATER_THAN, ">"},
 		{token.INTEGER, "10"},
+		{token.SEMICOLON, ";"},
+
+		{token.EOF, ""},
+	}
+
+	for _, tt := range tests {
+		tok := lexer.NextToken()
+		utils.ValidateValue(tok.Type, tt.expectedType, t)
+		utils.ValidateValue(tok.Literal, tt.expectedLiteral, t)
+	}
+}
+
+func TestTwoCharacterToken(t *testing.T) {
+	input := `5 == 3;
+              5 != 3;
+			  5 <= 3;
+			  5 >= 3;`
+	lexer := New(input)
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.INTEGER, "5"},
+		{token.EQUAL, "=="},
+		{token.INTEGER, "3"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "5"},
+		{token.NOT_EQUAL, "!="},
+		{token.INTEGER, "3"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "5"},
+		{token.LESS_OR_EQUAL, "<="},
+		{token.INTEGER, "3"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "5"},
+		{token.GREATER_OR_EQUAL, ">="},
+		{token.INTEGER, "3"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

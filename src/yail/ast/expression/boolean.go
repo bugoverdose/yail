@@ -10,8 +10,8 @@ type Boolean struct {
 }
 
 var (
-	TRUE  = Boolean{Token: token.NewKeyword(token.TRUE), Value: true}
-	FALSE = Boolean{Token: token.NewKeyword(token.FALSE), Value: false}
+	TRUE  = Boolean{Token: token.New(token.TRUE), Value: true}
+	FALSE = Boolean{Token: token.New(token.FALSE), Value: false}
 )
 
 func GetPooledBoolean(value bool) *Boolean {

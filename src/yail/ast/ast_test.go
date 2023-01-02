@@ -22,11 +22,11 @@ func TestAstIntegration(t *testing.T) {
 }
 
 func newVariableAssignment(name *expression.Identifier, value expression.Expression) *statement.VariableBinding {
-	return statement.NewVariableBinding(token.NewKeyword(token.VAR), name, value)
+	return statement.NewVariableBinding(token.New(token.VAR), name, value)
 }
 
 func newValueAssignment(name *expression.Identifier, value expression.Expression) *statement.VariableBinding {
-	return statement.NewVariableBinding(token.NewKeyword(token.VAL), name, value)
+	return statement.NewVariableBinding(token.New(token.VAL), name, value)
 }
 
 func newIntegerLiteral(literal string) *expression.IntegerLiteral {

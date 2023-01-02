@@ -4,6 +4,12 @@ import (
 	"yail/token"
 )
 
+var (
+	TRUE  = &BooleanExpression{Token: token.New(token.TRUE), Value: true}
+	FALSE = &BooleanExpression{Token: token.New(token.FALSE), Value: false}
+	NULL  = &NullExpression{Token: token.NULL_TOKEN}
+)
+
 type IntegerLiteralExpression struct {
 	Token token.Token
 	Value int64
@@ -29,11 +35,6 @@ type BooleanExpression struct {
 	Value bool
 }
 
-var (
-	TRUE  = &BooleanExpression{Token: token.New(token.TRUE), Value: true}
-	FALSE = &BooleanExpression{Token: token.New(token.FALSE), Value: false}
-)
-
 func GetPooledBoolean(value bool) *BooleanExpression {
 	if value {
 		return TRUE
@@ -47,6 +48,18 @@ func (b *BooleanExpression) TokenLiteral() string {
 }
 func (b *BooleanExpression) String() string {
 	return b.Token.Literal
+}
+
+type NullExpression struct {
+	Token token.Token
+}
+
+func (n *NullExpression) expressionNode() {}
+func (n *NullExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *NullExpression) String() string {
+	return n.Token.Literal
 }
 
 type IdentifierExpression struct {

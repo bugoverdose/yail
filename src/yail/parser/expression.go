@@ -41,6 +41,7 @@ func (p *Parser) initNullDenotations() {
 		token.INTEGER:          parseIntegerLiteral,
 		token.TRUE:             parseBoolean,
 		token.FALSE:            parseBoolean,
+		token.NULL:             parseNull,
 		token.NOT:              parsePrefixExpression,
 		token.MINUS:            parsePrefixExpression,
 		token.LEFT_PARENTHESIS: parseGroupedExpression,
@@ -132,6 +133,10 @@ func parseIntegerLiteral(p *Parser) ast.Expression {
 
 func parseBoolean(p *Parser) ast.Expression {
 	return ast.GetPooledBoolean(p.curTokenIs(token.TRUE))
+}
+
+func parseNull(p *Parser) ast.Expression {
+	return ast.NULL
 }
 
 func parsePrefixExpression(p *Parser) ast.Expression {

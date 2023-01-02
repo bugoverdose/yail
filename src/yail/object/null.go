@@ -1,5 +1,7 @@
 package object
 
+import "yail/token"
+
 const NULL_OBJ = "NULL"
 
 type Null struct {
@@ -14,5 +16,5 @@ func (n *Null) Type() ObjectType {
 }
 
 func (n *Null) Inspect() string {
-	return "null"
+	return token.NULL
 }

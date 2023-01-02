@@ -39,6 +39,7 @@ const (
 	IF     = "if"
 	ELSE   = "else"
 	RETURN = "return"
+	NULL   = "null"
 )
 
 type Token struct {
@@ -51,6 +52,7 @@ var (
 	UNUSED_TOKEN       = New(ILLEGAL)
 	IF_TOKEN           = New(IF)
 	LEFT_BRACKET_TOKEN = New(LEFT_BRACKET)
+	NULL_TOKEN         = New(NULL)
 )
 
 var keywords = map[string]Token{
@@ -61,6 +63,7 @@ var keywords = map[string]Token{
 	IF:     IF_TOKEN,
 	ELSE:   New(ELSE),
 	RETURN: New(RETURN),
+	NULL:   NULL_TOKEN,
 }
 
 var SingleCharacterTokens = map[string]Token{

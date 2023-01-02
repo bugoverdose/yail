@@ -20,6 +20,8 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 		return object.NewInteger(node.Value)
 	case *ast.BooleanExpression:
 		return getPooledBooleanObject(node.Value)
+	case *ast.NullExpression:
+		return object.NULL
 	case *ast.PrefixExpression:
 		return evalPrefixExpression(node, env)
 	case *ast.InfixExpression:

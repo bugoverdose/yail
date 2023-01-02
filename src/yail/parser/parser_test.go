@@ -18,7 +18,7 @@ func TestVariableBindingStatements(t *testing.T) {
 		{"var x = 5;", "x", 5},
 		{"val y = true;", "y", true},
 		{"val a = b;", "a", "b"},
-		{"val _ = 10;", "_", 10},
+		{"val _ = null;", "_", nil},
 	}
 
 	for _, tt := range tests {
@@ -326,6 +326,8 @@ func testLiteralExpression(
 		testIntegerLiteral(t, exp, v)
 	case bool:
 		testBooleanLiteral(t, exp, v)
+	case nil:
+		utils.ValidateValue(exp.(*ast.NullExpression), ast.NULL, t)
 	case string:
 		testIdentifier(t, exp, v)
 	default:

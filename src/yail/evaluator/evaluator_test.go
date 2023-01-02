@@ -65,7 +65,22 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 }
 
-func TestVariableBindingStatements(t *testing.T) {
+func TestEvalNullExpression(t *testing.T) {
+	tests := []struct {
+		input string
+	}{
+		{"null;"},
+		{"val x = null; x;"},
+		{"if (false) { 10 }"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		utils.ValidateObject(evaluated, object.NULL, t)
+	}
+}
+
+func TestVariableBindingStatement(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int64
@@ -80,7 +95,7 @@ func TestVariableBindingStatements(t *testing.T) {
 	}
 }
 
-func TestReassignmentStatements(t *testing.T) {
+func TestReassignmentStatement(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int64
@@ -95,7 +110,7 @@ func TestReassignmentStatements(t *testing.T) {
 	}
 }
 
-func TestIfElseExpressions(t *testing.T) {
+func TestIfElseExpression(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}

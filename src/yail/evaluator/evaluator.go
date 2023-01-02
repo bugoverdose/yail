@@ -24,8 +24,11 @@ func Eval(node node.Node, env *environment.Environment) object.Object {
 func evalProgram(program *ast.Program, env *environment.Environment) object.Object {
 	var result object.Object
 
-	for _, statement := range program.Statements {
-		result = Eval(statement, env)
+	for _, stmt := range program.Statements {
+		result = Eval(stmt, env)
+		if isError(result) {
+			return result
+		}
 	}
 	return result
 }

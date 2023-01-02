@@ -108,15 +108,15 @@ func TestErrorHandling(t *testing.T) {
 			"can not reassign variables declared with 'val'",
 		},
 		{
-			"5 + true;",
+			"5 + true; 10;",
 			"type mismatch: INTEGER + BOOLEAN",
 		},
 		{
-			"-true",
+			"5; -true; 10;",
 			"unknown operator: -BOOLEAN",
 		},
 		{
-			"true + false;",
+			"true + false; 5;",
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 	}

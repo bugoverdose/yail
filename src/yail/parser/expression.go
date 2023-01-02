@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	NO_PRIORITY         int = iota
-	COMPARISON_PRIORITY     // > or <
+	NO_PRIORITY int = iota
+	COMPARISON_PRIORITY
 	SUM_SUBTRACT_PRIORITY
 	PROD_DIV_PRIORITY
 	PREFIX_PRIORITY
@@ -63,14 +63,24 @@ func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
 }
 
 func (p *Parser) parseExpression(priority int) expression.Expression {
-	nud := p.nuds[p.curToken.Type]
-	if nud == nil {
-		msg := fmt.Sprintf("no parse function for %s found", p.curToken.Type)
-		p.errors = append(p.errors, msg)
+	ok, leftExp := p.parseCurToken()
+	if !ok {
 		return nil
 	}
-	leftExp := nud(p)
+	return p.pratParse(leftExp, priority)
+}
 
+func (p *Parser) parseCurToken() (bool, expression.Expression) {
+	nud := p.nuds[p.curToken.Type]
+	if nud == nil {
+		msg := fmt.Sprintf("failed to understand: '%s'", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return false, nil
+	}
+	return true, nud(p)
+}
+
+func (p *Parser) pratParse(leftExp expression.Expression, priority int) expression.Expression {
 	for !p.peekTokenIs(token.SEMICOLON) && priority < p.getNextTokenPriority() {
 		infix := p.leds[p.peekToken.Type]
 		if infix == nil {
@@ -79,7 +89,6 @@ func (p *Parser) parseExpression(priority int) expression.Expression {
 		p.nextToken()
 		leftExp = infix(leftExp, p)
 	}
-
 	return leftExp
 }
 

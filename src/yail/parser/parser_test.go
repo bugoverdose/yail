@@ -26,7 +26,7 @@ func TestVariableBindingStatements(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt := program.Statements[0]
@@ -49,7 +49,7 @@ func TestBooleanExpression(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
@@ -78,7 +78,7 @@ func TestPrefixExpressions(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
@@ -115,7 +115,7 @@ func TestInfixExpressions(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
@@ -128,7 +128,31 @@ func TestInfixExpressions(t *testing.T) {
 	}
 }
 
-func checkParserErrors(t *testing.T, p *Parser) {
+func TestIllegalInput(t *testing.T) {
+	tests := []struct {
+		input   string
+		illegal string
+	}{
+		{"&;", "&"},
+		{"5^2", "^"},
+		{"a + #", "#"},
+		{"2@", "@"},
+		{"$1", "$"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		p.ParseProgram()
+		errors := p.Errors()
+		for _, actual := range errors {
+			expected := fmt.Sprintf("failed to understand: '%s'", tt.illegal)
+			utils.ValidateValue(actual, expected, t)
+		}
+	}
+}
+
+func validateNoParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
 		return

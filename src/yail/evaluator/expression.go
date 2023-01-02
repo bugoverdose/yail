@@ -89,6 +89,10 @@ func evalInfixExpression(node *expression.Infix, env *environment.Environment) o
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(node.Token, left, right)
+	case node.Token.Type == token.EQUAL:
+		return getPooledBooleanObject(left == right)
+	case node.Token.Type == token.NOT_EQUAL:
+		return getPooledBooleanObject(left != right)
 	case left.Type() != right.Type():
 		return object.NewError("type mismatch: %s %s %s", left.Type(), node.Operator, right.Type())
 	default:
@@ -114,6 +118,14 @@ func evalIntegerInfixExpression(infixToken token.Token, left, right object.Objec
 		return getPooledBooleanObject(leftVal < rightVal)
 	case token.GREATER_THAN:
 		return getPooledBooleanObject(leftVal > rightVal)
+	case token.EQUAL:
+		return getPooledBooleanObject(leftVal == rightVal)
+	case token.NOT_EQUAL:
+		return getPooledBooleanObject(leftVal != rightVal)
+	case token.LESS_OR_EQUAL:
+		return getPooledBooleanObject(leftVal <= rightVal)
+	case token.GREATER_OR_EQUAL:
+		return getPooledBooleanObject(leftVal >= rightVal)
 	default:
 		return object.NewError("unknown operator: %s %s %s", left.Type(), infixToken.Literal, right.Type())
 	}

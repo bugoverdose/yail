@@ -44,6 +44,18 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"10 < 5", false},
 		{"5 < 5", false},
 		{"5 < 5", false},
+		{"5 == 5", true},
+		{"5 == true", false},
+		{"true == true", true},
+		{"true == false", false},
+		{"5 != 5", false},
+		{"5 != true", true},
+		{"true != true", false},
+		{"true != false", true},
+		{"5 <= 5", true},
+		{"5 <= 6", true},
+		{"5 >= 5", true},
+		{"5 >= 6", false},
 	}
 
 	for _, tt := range tests {
@@ -94,6 +106,18 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"val a = 5; a = 10;",
 			"can not reassign variables declared with 'val'",
+		},
+		{
+			"5 + true;",
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			"-true",
+			"unknown operator: -BOOLEAN",
+		},
+		{
+			"true + false;",
+			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 	}
 

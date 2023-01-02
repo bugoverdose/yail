@@ -3,17 +3,15 @@ package ast
 import (
 	"strconv"
 	"testing"
-	"yail/ast/expression"
-	"yail/ast/statement"
 	"yail/token"
 	"yail/utils"
 )
 
 func TestAstIntegration(t *testing.T) {
 	program := &Program{
-		Statements: []statement.Statement{
-			newVariableAssignment(expression.NewIdentifierFrom("x"), newIntegerLiteral("10")),
-			newValueAssignment(expression.NewIdentifierFrom("y"), newIntegerLiteral("20")),
+		Statements: []Statement{
+			newVariableAssignment(NewIdentifierFrom("x"), newIntegerLiteral("10")),
+			newValueAssignment(NewIdentifierFrom("y"), newIntegerLiteral("20")),
 			newExpressionStatement("z"),
 		},
 	}
@@ -21,26 +19,26 @@ func TestAstIntegration(t *testing.T) {
 	utils.ValidateValue(program.String(), "var x = 10; val y = 20; z;", t)
 }
 
-func newVariableAssignment(name *expression.Identifier, value expression.Expression) *statement.VariableBinding {
-	return statement.NewVariableBinding(token.New(token.VAR), name, value)
+func newVariableAssignment(name *IdentifierExpression, value Expression) *VariableBindingStatement {
+	return NewVariableBinding(token.New(token.VAR), name, value)
 }
 
-func newValueAssignment(name *expression.Identifier, value expression.Expression) *statement.VariableBinding {
-	return statement.NewVariableBinding(token.New(token.VAL), name, value)
+func newValueAssignment(name *IdentifierExpression, value Expression) *VariableBindingStatement {
+	return NewVariableBinding(token.New(token.VAL), name, value)
 }
 
-func newIntegerLiteral(literal string) *expression.IntegerLiteral {
+func newIntegerLiteral(literal string) *IntegerLiteralExpression {
 	value, err := strconv.ParseInt(literal, 0, 64)
 	if err != nil {
 		return nil
 	}
-	return &expression.IntegerLiteral{
+	return &IntegerLiteralExpression{
 		Token: token.NewInteger(literal),
 		Value: value,
 	}
 }
 
-func newExpressionStatement(identifier string) *statement.ExpressionStatement {
-	expr := expression.NewIdentifierFrom(identifier)
-	return statement.NewExpressionStatement(expr.Token, expr)
+func newExpressionStatement(identifier string) *ExpressionStatement {
+	expr := NewIdentifierFrom(identifier)
+	return NewExpressionStatement(expr.Token, expr)
 }

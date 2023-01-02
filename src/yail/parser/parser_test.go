@@ -3,8 +3,7 @@ package parser
 import (
 	"fmt"
 	"testing"
-	"yail/ast/expression"
-	"yail/ast/statement"
+	"yail/ast"
 	"yail/lexer"
 	"yail/token"
 	"yail/utils"
@@ -31,7 +30,7 @@ func TestVariableBindingStatements(t *testing.T) {
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt := program.Statements[0]
 		testVariableBindingStatement(t, stmt, tt.expectedIdentifier)
-		actualValue := stmt.(*statement.VariableBinding).Value
+		actualValue := stmt.(*ast.VariableBindingStatement).Value
 		testLiteralExpression(t, actualValue, tt.expectedValue)
 	}
 }
@@ -52,9 +51,9 @@ func TestBooleanExpression(t *testing.T) {
 		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
-		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
-		boolean, ok := stmt.Expression.(*expression.Boolean)
+		boolean, ok := stmt.Expression.(*ast.BooleanExpression)
 		utils.ValidateValue(ok, true, t)
 		utils.ValidateValue(boolean.Value, tt.expectedBoolean, t)
 	}
@@ -81,9 +80,9 @@ func TestPrefixExpressions(t *testing.T) {
 		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
-		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
-		expr, ok := stmt.Expression.(*expression.Prefix)
+		expr, ok := stmt.Expression.(*ast.PrefixExpression)
 		utils.ValidateValue(ok, true, t)
 		utils.ValidateValue(expr.Operator, tt.operator, t)
 		testLiteralExpression(t, expr.RightNode, tt.value)
@@ -116,7 +115,7 @@ func TestInfixExpressions(t *testing.T) {
 		validateNoParserErrors(t, p)
 
 		utils.ValidateValue(len(program.Statements), 1, t)
-		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
 		testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue)
 	}
@@ -131,15 +130,15 @@ func TestIfExpression(t *testing.T) {
 	validateNoParserErrors(t, p)
 
 	utils.ValidateValue(len(program.Statements), 1, t)
-	stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
 
-	expr, ok := stmt.Expression.(*expression.If)
+	expr, ok := stmt.Expression.(*ast.IfExpression)
 	utils.ValidateValue(ok, true, t)
 	testInfixExpression(t, expr.Condition, "x", "<", "y")
 
 	utils.ValidateValue(len(expr.Consequence.Statements), 1, t)
-	consequence, ok := expr.Consequence.Statements[0].(*statement.ExpressionStatement)
+	consequence, ok := expr.Consequence.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
 	testLiteralExpression(t, consequence.Expression, "x")
 
@@ -155,20 +154,20 @@ func TestIfElseExpression(t *testing.T) {
 	validateNoParserErrors(t, p)
 
 	utils.ValidateValue(len(program.Statements), 1, t)
-	stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
 
-	expr, ok := stmt.Expression.(*expression.If)
+	expr, ok := stmt.Expression.(*ast.IfExpression)
 	utils.ValidateValue(ok, true, t)
 	testInfixExpression(t, expr.Condition, "x", "<", "y")
 
 	utils.ValidateValue(len(expr.Consequence.Statements), 1, t)
-	consequence, ok := expr.Consequence.Statements[0].(*statement.ExpressionStatement)
+	consequence, ok := expr.Consequence.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
 	testLiteralExpression(t, consequence.Expression, "x")
 
 	utils.ValidateValue(len(expr.Alternative.Statements), 1, t)
-	alternative, ok := expr.Alternative.Statements[0].(*statement.ExpressionStatement)
+	alternative, ok := expr.Alternative.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
 	testLiteralExpression(t, alternative.Expression, "y")
 }
@@ -307,9 +306,9 @@ func validateNoParserErrors(t *testing.T, p *Parser) {
 	t.FailNow()
 }
 
-func testVariableBindingStatement(t *testing.T, s statement.Statement, identifier string) {
+func testVariableBindingStatement(t *testing.T, s ast.Statement, identifier string) {
 	utils.ValidateMatchAnyValue(s.TokenLiteral(), []string{token.VAR, token.VAL}, t)
-	stmt, ok := s.(*statement.VariableBinding)
+	stmt, ok := s.(*ast.VariableBindingStatement)
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(stmt.Name.Value, identifier, t)
 	utils.ValidateValue(stmt.Name.TokenLiteral(), identifier, t)
@@ -317,7 +316,7 @@ func testVariableBindingStatement(t *testing.T, s statement.Statement, identifie
 
 func testLiteralExpression(
 	t *testing.T,
-	exp expression.Expression,
+	exp ast.Expression,
 	expected interface{},
 ) {
 	switch v := expected.(type) {
@@ -334,22 +333,22 @@ func testLiteralExpression(
 	}
 }
 
-func testIntegerLiteral(t *testing.T, il expression.Expression, value int64) {
-	integer, ok := il.(*expression.IntegerLiteral)
+func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) {
+	integer, ok := il.(*ast.IntegerLiteralExpression)
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(integer.Value, value, t)
 	utils.ValidateValue(integer.TokenLiteral(), fmt.Sprintf("%d", value), t)
 }
 
-func testBooleanLiteral(t *testing.T, exp expression.Expression, value bool) {
-	boolean, ok := exp.(*expression.Boolean)
+func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) {
+	boolean, ok := exp.(*ast.BooleanExpression)
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(boolean.Value, value, t)
 	utils.ValidateValue(boolean.TokenLiteral(), fmt.Sprintf("%t", value), t)
 }
 
-func testIdentifier(t *testing.T, exp expression.Expression, value string) {
-	ident, ok := exp.(*expression.Identifier)
+func testIdentifier(t *testing.T, exp ast.Expression, value string) {
+	ident, ok := exp.(*ast.IdentifierExpression)
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(ident.Value, value, t)
 	utils.ValidateValue(ident.TokenLiteral(), value, t)
@@ -357,12 +356,12 @@ func testIdentifier(t *testing.T, exp expression.Expression, value string) {
 
 func testInfixExpression(
 	t *testing.T,
-	expr expression.Expression,
+	expr ast.Expression,
 	expectedLeftValue interface{},
 	expectedOperator string,
 	expectedRightValue interface{},
 ) {
-	infixExpr, ok := expr.(*expression.Infix)
+	infixExpr, ok := expr.(*ast.InfixExpression)
 	utils.ValidateValue(ok, true, t)
 	testLiteralExpression(t, infixExpr.LeftNode, expectedLeftValue)
 	utils.ValidateValue(infixExpr.Operator, expectedOperator, t)

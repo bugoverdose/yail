@@ -1,7 +1,7 @@
 package evaluator
 
 import (
-	"yail/ast/expression"
+	"yail/ast"
 	"yail/environment"
 	"yail/object"
 	"yail/token"
@@ -12,25 +12,25 @@ var (
 	FALSE = &object.Boolean{Value: false}
 )
 
-func evalExpression(node expression.Expression, env *environment.Environment) object.Object {
+func evalExpression(node ast.Expression, env *environment.Environment) object.Object {
 	switch node := node.(type) {
-	case *expression.Identifier:
+	case *ast.IdentifierExpression:
 		return evalIdentifier(node, env)
-	case *expression.IntegerLiteral:
+	case *ast.IntegerLiteralExpression:
 		return object.NewInteger(node.Value)
-	case *expression.Boolean:
+	case *ast.BooleanExpression:
 		return getPooledBooleanObject(node.Value)
-	case *expression.Prefix:
+	case *ast.PrefixExpression:
 		return evalPrefixExpression(node, env)
-	case *expression.Infix:
+	case *ast.InfixExpression:
 		return evalInfixExpression(node, env)
-	case *expression.If:
+	case *ast.IfExpression:
 		return evalIfExpression(node, env)
 	}
 	return nil
 }
 
-func evalIdentifier(node *expression.Identifier, env *environment.Environment) object.Object {
+func evalIdentifier(node *ast.IdentifierExpression, env *environment.Environment) object.Object {
 	val, ok := env.Get(node.Value)
 	if !ok {
 		return object.NewError("identifier not found: " + node.Value)
@@ -45,7 +45,7 @@ func getPooledBooleanObject(input bool) *object.Boolean {
 	return FALSE
 }
 
-func evalPrefixExpression(node *expression.Prefix, env *environment.Environment) object.Object {
+func evalPrefixExpression(node *ast.PrefixExpression, env *environment.Environment) object.Object {
 	right := Eval(node.RightNode, env)
 	if isError(right) {
 		return right
@@ -79,7 +79,7 @@ func evalNegativePrefixOperatorExpression(right object.Object) object.Object {
 	return object.NewInteger(-value)
 }
 
-func evalInfixExpression(node *expression.Infix, env *environment.Environment) object.Object {
+func evalInfixExpression(node *ast.InfixExpression, env *environment.Environment) object.Object {
 	left := Eval(node.LeftNode, env)
 	if isError(left) {
 		return left
@@ -133,10 +133,7 @@ func evalIntegerInfixExpression(infixToken token.Token, left, right object.Objec
 	}
 }
 
-func evalIfExpression(
-	expression *expression.If,
-	env *environment.Environment,
-) object.Object {
+func evalIfExpression(expression *ast.IfExpression, env *environment.Environment) object.Object {
 	condition := Eval(expression.Condition, env)
 	if isError(condition) {
 		return condition

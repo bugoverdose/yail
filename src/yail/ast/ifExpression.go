@@ -1,20 +1,19 @@
-package expression
+package ast
 
 import (
 	"bytes"
-	"yail/ast/statement"
 	"yail/token"
 )
 
-type If struct {
+type IfExpression struct {
 	Token       token.Token
 	Condition   Expression
-	Consequence *statement.Block
-	Alternative *statement.Block
+	Consequence *BlockStatement
+	Alternative *BlockStatement
 }
 
-func NewIf(condition Expression, consequence *statement.Block) *If {
-	return &If{
+func NewIf(condition Expression, consequence *BlockStatement) *IfExpression {
+	return &IfExpression{
 		Token:       token.IF_TOKEN,
 		Condition:   condition,
 		Consequence: consequence,
@@ -22,8 +21,8 @@ func NewIf(condition Expression, consequence *statement.Block) *If {
 	}
 }
 
-func NewIfElse(condition Expression, consequence, alternative *statement.Block) *If {
-	return &If{
+func NewIfElse(condition Expression, consequence, alternative *BlockStatement) *IfExpression {
+	return &IfExpression{
 		Token:       token.IF_TOKEN,
 		Condition:   condition,
 		Consequence: consequence,
@@ -31,13 +30,11 @@ func NewIfElse(condition Expression, consequence, alternative *statement.Block) 
 	}
 }
 
-func (i *If) expressionNode() {}
-
-func (i *If) TokenLiteral() string {
+func (i *IfExpression) expressionNode() {}
+func (i *IfExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
-
-func (i *If) String() string {
+func (i *IfExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("if")
 	out.WriteString(i.Condition.String())

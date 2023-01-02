@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"yail/ast"
-	"yail/ast/statement"
 	"yail/lexer"
 	"yail/token"
 )
@@ -33,7 +32,7 @@ func New(lexer *lexer.Lexer) *Parser {
 
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
-	program.Statements = []statement.Statement{}
+	program.Statements = []ast.Statement{}
 
 	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
@@ -45,7 +44,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return program
 }
 
-func (p *Parser) parseStatement() statement.Statement {
+func (p *Parser) parseStatement() ast.Statement {
 	if isVariableBindingStatement(p) {
 		return parseVariableBindingStatement(p)
 	}

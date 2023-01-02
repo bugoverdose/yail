@@ -1,25 +1,25 @@
 package evaluator
 
 import (
-	"yail/ast/statement"
+	"yail/ast"
 	"yail/environment"
 	"yail/object"
 	"yail/token"
 )
 
-func evalStatement(node statement.Statement, env *environment.Environment) object.Object {
+func evalStatement(node ast.Statement, env *environment.Environment) object.Object {
 	switch node := node.(type) {
-	case *statement.ExpressionStatement:
-		return Eval(node, env)
-	case *statement.VariableBinding:
+	case *ast.ExpressionStatement:
+		return Eval(node.Expression, env)
+	case *ast.VariableBindingStatement:
 		return evalVariableBinding(node, env)
-	case *statement.Reassignment:
+	case *ast.ReassignmentStatement:
 		return evalReassignment(node, env)
 	}
 	return nil
 }
 
-func evalVariableBinding(node *statement.VariableBinding, env *environment.Environment) object.Object {
+func evalVariableBinding(node *ast.VariableBindingStatement, env *environment.Environment) object.Object {
 	val := Eval(node.Value, env)
 	if isError(val) {
 		return val
@@ -31,7 +31,7 @@ func evalVariableBinding(node *statement.VariableBinding, env *environment.Envir
 	return nil
 }
 
-func assignNewVariable(node *statement.VariableBinding, env *environment.Environment, val object.Object) (bool, *object.Error) {
+func assignNewVariable(node *ast.VariableBindingStatement, env *environment.Environment, val object.Object) (bool, *object.Error) {
 	switch node.Token.Type {
 	case token.VAL:
 		return env.ImmutableAssign(node.Name.Value, val)
@@ -42,7 +42,7 @@ func assignNewVariable(node *statement.VariableBinding, env *environment.Environ
 	}
 }
 
-func evalReassignment(node *statement.Reassignment, env *environment.Environment) object.Object {
+func evalReassignment(node *ast.ReassignmentStatement, env *environment.Environment) object.Object {
 	val := Eval(node.Value, env)
 	if isError(val) {
 		return val

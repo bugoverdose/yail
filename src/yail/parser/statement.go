@@ -1,8 +1,7 @@
 package parser
 
 import (
-	"yail/ast/expression"
-	"yail/ast/statement"
+	"yail/ast"
 	"yail/token"
 )
 
@@ -10,12 +9,12 @@ func isVariableBindingStatement(p *Parser) bool {
 	return p.curTokenIs(token.VAR) || p.curTokenIs(token.VAL)
 }
 
-func parseVariableBindingStatement(p *Parser) *statement.VariableBinding {
+func parseVariableBindingStatement(p *Parser) *ast.VariableBindingStatement {
 	curToken := p.curToken
 	if !p.nextTokenAndValidate(token.IDENTIFIER) {
 		return nil
 	}
-	name := expression.NewIdentifierFrom(p.curToken.Literal)
+	name := ast.NewIdentifierFrom(p.curToken.Literal)
 
 	if !p.nextTokenAndValidate(token.ASSIGN) {
 		return nil
@@ -27,19 +26,19 @@ func parseVariableBindingStatement(p *Parser) *statement.VariableBinding {
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil
 	}
-	return statement.NewVariableBinding(curToken, name, value)
+	return ast.NewVariableBinding(curToken, name, value)
 }
 
 func isReassignmentStatement(p *Parser) bool {
 	return p.curTokenIs(token.IDENTIFIER) && p.peekTokenIs(token.ASSIGN)
 }
 
-func parseReassignmentStatement(p *Parser) *statement.Reassignment {
+func parseReassignmentStatement(p *Parser) *ast.ReassignmentStatement {
 	curToken := p.curToken
 	if !p.curTokenIs(token.IDENTIFIER) {
 		return nil
 	}
-	name := expression.NewIdentifierFrom(p.curToken.Literal)
+	name := ast.NewIdentifierFrom(p.curToken.Literal)
 
 	if !p.nextTokenAndValidate(token.ASSIGN) {
 		return nil
@@ -51,5 +50,5 @@ func parseReassignmentStatement(p *Parser) *statement.Reassignment {
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil
 	}
-	return statement.NewReassignment(curToken, name, value)
+	return ast.NewReassignment(curToken, name, value)
 }

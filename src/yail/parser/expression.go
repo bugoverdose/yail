@@ -3,8 +3,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
-	"yail/ast/expression"
-	"yail/ast/statement"
+	"yail/ast"
 	"yail/token"
 )
 
@@ -32,8 +31,8 @@ var priorities = map[token.TokenType]int{
 }
 
 type (
-	nullDenotation func(p *Parser) expression.Expression
-	leftDenotation func(e expression.Expression, p *Parser) expression.Expression
+	nullDenotation func(p *Parser) ast.Expression
+	leftDenotation func(e ast.Expression, p *Parser) ast.Expression
 )
 
 func (p *Parser) initNullDenotations() {
@@ -65,15 +64,15 @@ func (p *Parser) initLeftDenotations() {
 	}
 }
 
-func parseExpressionStatement(p *Parser) *statement.ExpressionStatement {
-	stmt := statement.NewExpressionStatement(p.curToken, p.parseExpression(NO_PRIORITY))
+func parseExpressionStatement(p *Parser) *ast.ExpressionStatement {
+	stmt := ast.NewExpressionStatement(p.curToken, p.parseExpression(NO_PRIORITY))
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
 }
 
-func (p *Parser) parseExpression(priority int) expression.Expression {
+func (p *Parser) parseExpression(priority int) ast.Expression {
 	ok, leftExp := p.parseCurToken()
 	if !ok {
 		return nil
@@ -81,7 +80,7 @@ func (p *Parser) parseExpression(priority int) expression.Expression {
 	return p.pratParse(leftExp, priority)
 }
 
-func (p *Parser) parseCurToken() (bool, expression.Expression) {
+func (p *Parser) parseCurToken() (bool, ast.Expression) {
 	nud := p.nuds[p.curToken.Type]
 	if nud == nil {
 		msg := fmt.Sprintf("failed to understand: '%s'", p.curToken.Literal)
@@ -91,7 +90,7 @@ func (p *Parser) parseCurToken() (bool, expression.Expression) {
 	return true, nud(p)
 }
 
-func (p *Parser) pratParse(leftExp expression.Expression, priority int) expression.Expression {
+func (p *Parser) pratParse(leftExp ast.Expression, priority int) ast.Expression {
 	for !p.peekTokenIs(token.SEMICOLON) && priority < p.getNextTokenPriority() {
 		infix := p.leds[p.peekToken.Type]
 		if infix == nil {
@@ -117,32 +116,32 @@ func (p *Parser) getNextTokenPriority() int {
 	return NO_PRIORITY
 }
 
-func parseIdentifier(p *Parser) expression.Expression {
-	return expression.NewIdentifier(p.curToken)
+func parseIdentifier(p *Parser) ast.Expression {
+	return ast.NewIdentifier(p.curToken)
 }
 
-func parseIntegerLiteral(p *Parser) expression.Expression {
+func parseIntegerLiteral(p *Parser) ast.Expression {
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
-	return expression.NewIntegerLiteral(p.curToken, value)
+	return ast.NewIntegerLiteral(p.curToken, value)
 }
 
-func parseBoolean(p *Parser) expression.Expression {
-	return expression.GetPooledBoolean(p.curTokenIs(token.TRUE))
+func parseBoolean(p *Parser) ast.Expression {
+	return ast.GetPooledBoolean(p.curTokenIs(token.TRUE))
 }
 
-func parsePrefixExpression(p *Parser) expression.Expression {
+func parsePrefixExpression(p *Parser) ast.Expression {
 	prefixToken := p.curToken
 	p.nextToken()
 	rightNode := p.parseExpression(PREFIX_PRIORITY)
-	return expression.NewPrefix(prefixToken, rightNode)
+	return ast.NewPrefix(prefixToken, rightNode)
 }
 
-func parseGroupedExpression(p *Parser) expression.Expression {
+func parseGroupedExpression(p *Parser) ast.Expression {
 	p.nextToken()
 	exp := p.parseExpression(NO_PRIORITY) // always parse inside the `(~)` first
 	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
@@ -151,7 +150,7 @@ func parseGroupedExpression(p *Parser) expression.Expression {
 	return exp
 }
 
-func parseIfExpression(p *Parser) expression.Expression {
+func parseIfExpression(p *Parser) ast.Expression {
 	if !p.nextTokenAndValidate(token.LEFT_PARENTHESIS) {
 		return nil
 	}
@@ -170,13 +169,13 @@ func parseIfExpression(p *Parser) expression.Expression {
 			return nil
 		}
 		alternative := parseBlockStatement(p)
-		return expression.NewIfElse(condition, consequence, alternative)
+		return ast.NewIfElse(condition, consequence, alternative)
 	}
-	return expression.NewIf(condition, consequence)
+	return ast.NewIf(condition, consequence)
 }
 
-func parseBlockStatement(p *Parser) *statement.Block {
-	var statements []statement.Statement
+func parseBlockStatement(p *Parser) *ast.BlockStatement {
+	var statements []ast.Statement
 	p.nextToken()
 	for !p.curTokenIs(token.RIGHT_BRACKET) && !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
@@ -185,13 +184,13 @@ func parseBlockStatement(p *Parser) *statement.Block {
 		}
 		p.nextToken()
 	}
-	return statement.NewBlock(statements)
+	return ast.NewBlock(statements)
 }
 
-func parseInfixExpression(leftNode expression.Expression, p *Parser) expression.Expression {
+func parseInfixExpression(leftNode ast.Expression, p *Parser) ast.Expression {
 	infixToken := p.curToken
 	priority := p.getCurTokenPriority()
 	p.nextToken()
 	rightNode := p.parseExpression(priority)
-	return expression.NewInfix(leftNode, infixToken, rightNode)
+	return ast.NewInfix(leftNode, infixToken, rightNode)
 }

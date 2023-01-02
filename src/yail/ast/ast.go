@@ -3,11 +3,25 @@ package ast
 import (
 	"bytes"
 	"strings"
-	"yail/ast/statement"
 )
 
+type Node interface {
+	TokenLiteral() string
+	String() string
+}
+
+type Expression interface {
+	Node
+	expressionNode()
+}
+
+type Statement interface {
+	Node
+	statementNode()
+}
+
 type Program struct {
-	Statements []statement.Statement
+	Statements []Statement
 }
 
 func (p *Program) TokenLiteral() string {

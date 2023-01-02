@@ -2,20 +2,17 @@ package evaluator
 
 import (
 	"yail/ast"
-	"yail/ast/expression"
-	"yail/ast/node"
-	"yail/ast/statement"
 	"yail/environment"
 	"yail/object"
 )
 
-func Eval(node node.Node, env *environment.Environment) object.Object {
+func Eval(node ast.Node, env *environment.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, env)
-	case statement.Statement:
+	case ast.Statement:
 		return evalStatement(node, env)
-	case expression.Expression:
+	case ast.Expression:
 		return evalExpression(node, env)
 	}
 	return nil

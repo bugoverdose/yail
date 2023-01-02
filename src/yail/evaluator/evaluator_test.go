@@ -23,6 +23,7 @@ func TestEvalIntegerExpression(t *testing.T) {
 		{"1 + 2 * 3", 7},
 		{"1 + 3 / 2", 2},
 		{"1 + 10 % 4", 3},
+		{"(1 + 2) * (5 - 2)", 9},
 	}
 
 	for _, tt := range tests {

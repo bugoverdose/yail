@@ -46,7 +46,7 @@ func TestVariableBinding(t *testing.T) {
 
 func TestSingleCharacterToken(t *testing.T) {
 	input := `!true;
-              1 + 2 - 3 * 10 / 2 % 3;
+              1 + (2 - 3) * 10 / 2 % 3;
 			  -10 < 5;
 			  5 > 10;`
 	lexer := New(input)
@@ -61,9 +61,11 @@ func TestSingleCharacterToken(t *testing.T) {
 
 		{token.INTEGER, "1"},
 		{token.PLUS, "+"},
+		{token.LEFT_PARENTHESIS, "("},
 		{token.INTEGER, "2"},
 		{token.MINUS, "-"},
 		{token.INTEGER, "3"},
+		{token.RIGHT_PARENTHESIS, ")"},
 		{token.MULTIPLY, "*"},
 		{token.INTEGER, "10"},
 		{token.DIVIDE, "/"},

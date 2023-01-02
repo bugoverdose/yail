@@ -38,12 +38,13 @@ type (
 
 func (p *Parser) initNullDenotations() {
 	p.nuds = map[token.TokenType]nullDenotation{
-		token.IDENTIFIER: parseIdentifier,
-		token.INTEGER:    parseIntegerLiteral,
-		token.TRUE:       parseBoolean,
-		token.FALSE:      parseBoolean,
-		token.NOT:        parsePrefixExpression,
-		token.MINUS:      parsePrefixExpression,
+		token.IDENTIFIER:       parseIdentifier,
+		token.INTEGER:          parseIntegerLiteral,
+		token.TRUE:             parseBoolean,
+		token.FALSE:            parseBoolean,
+		token.NOT:              parsePrefixExpression,
+		token.MINUS:            parsePrefixExpression,
+		token.LEFT_PARENTHESIS: parseGroupedExpression,
 	}
 }
 
@@ -138,6 +139,15 @@ func parsePrefixExpression(p *Parser) expression.Expression {
 	p.nextToken()
 	rightNode := p.parseExpression(PREFIX_PRIORITY)
 	return expression.NewPrefix(prefixToken, rightNode)
+}
+
+func parseGroupedExpression(p *Parser) expression.Expression {
+	p.nextToken()
+	exp := p.parseExpression(NO_PRIORITY) // always parse inside the `(~)` first
+	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
+		return nil
+	}
+	return exp
 }
 
 func parseInfixExpression(leftNode expression.Expression, p *Parser) expression.Expression {

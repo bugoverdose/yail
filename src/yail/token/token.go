@@ -25,7 +25,9 @@ const (
 	GREATER_OR_EQUAL = ">="
 
 	// Delimiters
-	SEMICOLON = ";"
+	SEMICOLON         = ";"
+	LEFT_PARENTHESIS  = "("
+	RIGHT_PARENTHESIS = ")"
 
 	// Keywords
 	VAR   = "var"
@@ -52,16 +54,18 @@ var keywords = map[string]Token{
 }
 
 var SingleCharacterTokens = map[string]Token{
-	ASSIGN:       New(ASSIGN),
-	NOT:          New(NOT),
-	PLUS:         New(PLUS),
-	MINUS:        New(MINUS),
-	MULTIPLY:     New(MULTIPLY),
-	DIVIDE:       New(DIVIDE),
-	MODULO:       New(MODULO),
-	LESS_THAN:    New(LESS_THAN),
-	GREATER_THAN: New(GREATER_THAN),
-	SEMICOLON:    New(SEMICOLON),
+	ASSIGN:            New(ASSIGN),
+	NOT:               New(NOT),
+	PLUS:              New(PLUS),
+	MINUS:             New(MINUS),
+	MULTIPLY:          New(MULTIPLY),
+	DIVIDE:            New(DIVIDE),
+	MODULO:            New(MODULO),
+	LESS_THAN:         New(LESS_THAN),
+	GREATER_THAN:      New(GREATER_THAN),
+	SEMICOLON:         New(SEMICOLON),
+	LEFT_PARENTHESIS:  New(LEFT_PARENTHESIS),
+	RIGHT_PARENTHESIS: New(RIGHT_PARENTHESIS),
 }
 
 var TwoCharacterTokens = map[string]Token{

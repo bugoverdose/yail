@@ -133,3 +133,33 @@ func TestTwoCharacterToken(t *testing.T) {
 		utils.ValidateValue(tok.Literal, tt.expectedLiteral, t)
 	}
 }
+
+func TestIllegalToken(t *testing.T) {
+	input := `&;
+    	      var x = a^b;`
+	lexer := New(input)
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.ILLEGAL, "&"},
+		{token.SEMICOLON, ";"},
+
+		{token.VAR, "var"},
+		{token.IDENTIFIER, "x"},
+		{token.ASSIGN, "="},
+		{token.IDENTIFIER, "a"},
+		{token.ILLEGAL, "^"},
+		{token.IDENTIFIER, "b"},
+		{token.SEMICOLON, ";"},
+
+		{token.EOF, ""},
+	}
+
+	for _, tt := range tests {
+		tok := lexer.NextToken()
+		utils.ValidateValue(tok.Type, tt.expectedType, t)
+		utils.ValidateValue(tok.Literal, tt.expectedLiteral, t)
+	}
+}

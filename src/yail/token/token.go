@@ -40,8 +40,8 @@ type Token struct {
 }
 
 var (
-	ILLEGAL_TOKEN = New(ILLEGAL)
-	EOF_TOKEN     = Token{Type: EOF, Literal: ""}
+	EOF_TOKEN    = Token{Type: EOF, Literal: ""}
+	UNUSED_TOKEN = New(ILLEGAL)
 )
 
 var keywords = map[string]Token{
@@ -88,4 +88,8 @@ func NewKeywordOrIdentifier(literal string) Token {
 
 func NewIdentifier(literal string) Token {
 	return Token{Type: IDENTIFIER, Literal: literal}
+}
+
+func NewIllegal(literal string) Token {
+	return Token{Type: ILLEGAL, Literal: literal}
 }

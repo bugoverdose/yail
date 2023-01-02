@@ -118,12 +118,59 @@ func TestInfixExpressions(t *testing.T) {
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
-		expr, ok := stmt.Expression.(*expression.Infix)
-		utils.ValidateValue(ok, true, t)
-		utils.ValidateValue(expr.Operator, tt.operator, t)
-		testLiteralExpression(t, expr.LeftNode, tt.leftValue)
-		testLiteralExpression(t, expr.RightNode, tt.rightValue)
+		testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue)
 	}
+}
+
+func TestIfExpression(t *testing.T) {
+	input := `if (x < y) { x }`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	utils.ValidateValue(len(program.Statements), 1, t)
+	stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+
+	expr, ok := stmt.Expression.(*expression.If)
+	utils.ValidateValue(ok, true, t)
+	testInfixExpression(t, expr.Condition, "x", "<", "y")
+
+	utils.ValidateValue(len(expr.Consequence.Statements), 1, t)
+	consequence, ok := expr.Consequence.Statements[0].(*statement.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+	testLiteralExpression(t, consequence.Expression, "x")
+
+	utils.ValidateValue(expr.Alternative, nil, t)
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x < y) { x } else { y }`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	utils.ValidateValue(len(program.Statements), 1, t)
+	stmt, ok := program.Statements[0].(*statement.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+
+	expr, ok := stmt.Expression.(*expression.If)
+	utils.ValidateValue(ok, true, t)
+	testInfixExpression(t, expr.Condition, "x", "<", "y")
+
+	utils.ValidateValue(len(expr.Consequence.Statements), 1, t)
+	consequence, ok := expr.Consequence.Statements[0].(*statement.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+	testLiteralExpression(t, consequence.Expression, "x")
+
+	utils.ValidateValue(len(expr.Alternative.Statements), 1, t)
+	alternative, ok := expr.Alternative.Statements[0].(*statement.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+	testLiteralExpression(t, alternative.Expression, "y")
 }
 
 func TestOperationPriorities(t *testing.T) {
@@ -306,4 +353,18 @@ func testIdentifier(t *testing.T, exp expression.Expression, value string) {
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(ident.Value, value, t)
 	utils.ValidateValue(ident.TokenLiteral(), value, t)
+}
+
+func testInfixExpression(
+	t *testing.T,
+	expr expression.Expression,
+	expectedLeftValue interface{},
+	expectedOperator string,
+	expectedRightValue interface{},
+) {
+	infixExpr, ok := expr.(*expression.Infix)
+	utils.ValidateValue(ok, true, t)
+	testLiteralExpression(t, infixExpr.LeftNode, expectedLeftValue)
+	utils.ValidateValue(infixExpr.Operator, expectedOperator, t)
+	testLiteralExpression(t, infixExpr.RightNode, expectedRightValue)
 }

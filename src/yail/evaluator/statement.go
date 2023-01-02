@@ -10,7 +10,7 @@ import (
 func evalStatement(node statement.Statement, env *environment.Environment) object.Object {
 	switch node := node.(type) {
 	case *statement.ExpressionStatement:
-		return Eval(node.Expression, env)
+		return Eval(node, env)
 	case *statement.VariableBinding:
 		return evalVariableBinding(node, env)
 	case *statement.Reassignment:

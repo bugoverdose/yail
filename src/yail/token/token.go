@@ -28,12 +28,17 @@ const (
 	SEMICOLON         = ";"
 	LEFT_PARENTHESIS  = "("
 	RIGHT_PARENTHESIS = ")"
+	LEFT_BRACKET      = "{"
+	RIGHT_BRACKET     = "}"
 
 	// Keywords
-	VAR   = "var"
-	VAL   = "val"
-	TRUE  = "true"
-	FALSE = "false"
+	VAR    = "var"
+	VAL    = "val"
+	TRUE   = "true"
+	FALSE  = "false"
+	IF     = "if"
+	ELSE   = "else"
+	RETURN = "return"
 )
 
 type Token struct {
@@ -42,15 +47,20 @@ type Token struct {
 }
 
 var (
-	EOF_TOKEN    = Token{Type: EOF, Literal: ""}
-	UNUSED_TOKEN = New(ILLEGAL)
+	EOF_TOKEN          = Token{Type: EOF, Literal: ""}
+	UNUSED_TOKEN       = New(ILLEGAL)
+	IF_TOKEN           = New(IF)
+	LEFT_BRACKET_TOKEN = New(LEFT_BRACKET)
 )
 
 var keywords = map[string]Token{
-	VAR:   New(VAR),
-	VAL:   New(VAL),
-	TRUE:  New(TRUE),
-	FALSE: New(FALSE),
+	VAR:    New(VAR),
+	VAL:    New(VAL),
+	TRUE:   New(TRUE),
+	FALSE:  New(FALSE),
+	IF:     IF_TOKEN,
+	ELSE:   New(ELSE),
+	RETURN: New(RETURN),
 }
 
 var SingleCharacterTokens = map[string]Token{
@@ -66,6 +76,8 @@ var SingleCharacterTokens = map[string]Token{
 	SEMICOLON:         New(SEMICOLON),
 	LEFT_PARENTHESIS:  New(LEFT_PARENTHESIS),
 	RIGHT_PARENTHESIS: New(RIGHT_PARENTHESIS),
+	LEFT_BRACKET:      LEFT_BRACKET_TOKEN,
+	RIGHT_BRACKET:     New(RIGHT_BRACKET),
 }
 
 var TwoCharacterTokens = map[string]Token{

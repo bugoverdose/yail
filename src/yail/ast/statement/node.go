@@ -1,8 +1,6 @@
 package statement
 
-import (
-	"yail/ast/node"
-)
+import "yail/ast/node"
 
 type Statement interface {
 	node.Node

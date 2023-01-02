@@ -24,6 +24,8 @@ func evalExpression(node expression.Expression, env *environment.Environment) ob
 		return evalPrefixExpression(node, env)
 	case *expression.Infix:
 		return evalInfixExpression(node, env)
+	case *expression.If:
+		return evalIfExpression(node, env)
 	}
 	return nil
 }
@@ -129,4 +131,21 @@ func evalIntegerInfixExpression(infixToken token.Token, left, right object.Objec
 	default:
 		return object.NewError("unknown operator: %s %s %s", left.Type(), infixToken.Literal, right.Type())
 	}
+}
+
+func evalIfExpression(
+	expression *expression.If,
+	env *environment.Environment,
+) object.Object {
+	condition := Eval(expression.Condition, env)
+	if isError(condition) {
+		return condition
+	}
+	if condition == TRUE {
+		return Eval(expression.Consequence, env)
+	}
+	if condition == FALSE && expression.Alternative != nil {
+		return Eval(expression.Alternative, env)
+	}
+	return object.NULL
 }

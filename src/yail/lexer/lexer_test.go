@@ -44,6 +44,39 @@ func TestVariableBinding(t *testing.T) {
 	}
 }
 
+func TestIfExpression(t *testing.T) {
+	input := `if (x > y) { x } else { y };`
+	lexer := New(input)
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.IF, "if"},
+		{token.LEFT_PARENTHESIS, "("},
+		{token.IDENTIFIER, "x"},
+		{token.GREATER_THAN, ">"},
+		{token.IDENTIFIER, "y"},
+		{token.RIGHT_PARENTHESIS, ")"},
+		{token.LEFT_BRACKET, "{"},
+		{token.IDENTIFIER, "x"},
+		{token.RIGHT_BRACKET, "}"},
+		{token.ELSE, "else"},
+		{token.LEFT_BRACKET, "{"},
+		{token.IDENTIFIER, "y"},
+		{token.RIGHT_BRACKET, "}"},
+		{token.SEMICOLON, ";"},
+
+		{token.EOF, ""},
+	}
+
+	for _, tt := range tests {
+		tok := lexer.NextToken()
+		utils.ValidateValue(tok.Type, tt.expectedType, t)
+		utils.ValidateValue(tok.Literal, tt.expectedLiteral, t)
+	}
+}
+
 func TestSingleCharacterToken(t *testing.T) {
 	input := `!true;
               1 + (2 - 3) * 10 / 2 % 3;

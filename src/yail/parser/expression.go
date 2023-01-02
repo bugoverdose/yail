@@ -45,6 +45,7 @@ func (p *Parser) initNullDenotations() {
 		token.NOT:              parsePrefixExpression,
 		token.MINUS:            parsePrefixExpression,
 		token.LEFT_PARENTHESIS: parseGroupedExpression,
+		token.IF:               parseIfExpression,
 	}
 }
 
@@ -148,6 +149,43 @@ func parseGroupedExpression(p *Parser) expression.Expression {
 		return nil
 	}
 	return exp
+}
+
+func parseIfExpression(p *Parser) expression.Expression {
+	if !p.nextTokenAndValidate(token.LEFT_PARENTHESIS) {
+		return nil
+	}
+	p.nextToken()
+	condition := p.parseExpression(NO_PRIORITY)
+	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
+		return nil
+	}
+	if !p.nextTokenAndValidate(token.LEFT_BRACKET) {
+		return nil
+	}
+	consequence := parseBlockStatement(p)
+	if p.peekTokenIs(token.ELSE) {
+		p.nextToken()
+		if !p.nextTokenAndValidate(token.LEFT_BRACKET) {
+			return nil
+		}
+		alternative := parseBlockStatement(p)
+		return expression.NewIfElse(condition, consequence, alternative)
+	}
+	return expression.NewIf(condition, consequence)
+}
+
+func parseBlockStatement(p *Parser) *statement.Block {
+	var statements []statement.Statement
+	p.nextToken()
+	for !p.curTokenIs(token.RIGHT_BRACKET) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			statements = append(statements, stmt)
+		}
+		p.nextToken()
+	}
+	return statement.NewBlock(statements)
 }
 
 func parseInfixExpression(leftNode expression.Expression, p *Parser) expression.Expression {

@@ -10,6 +10,7 @@ import (
 
 const (
 	NO_PRIORITY int = iota
+	EQUALS_PRIORITY
 	COMPARISON_PRIORITY
 	SUM_SUBTRACT_PRIORITY
 	PROD_DIV_PRIORITY
@@ -17,13 +18,17 @@ const (
 )
 
 var priorities = map[token.TokenType]int{
-	token.PLUS:         SUM_SUBTRACT_PRIORITY,
-	token.MINUS:        SUM_SUBTRACT_PRIORITY,
-	token.MULTIPLY:     PROD_DIV_PRIORITY,
-	token.DIVIDE:       PROD_DIV_PRIORITY,
-	token.MODULO:       PROD_DIV_PRIORITY,
-	token.LESS_THAN:    COMPARISON_PRIORITY,
-	token.GREATER_THAN: COMPARISON_PRIORITY,
+	token.PLUS:             SUM_SUBTRACT_PRIORITY,
+	token.MINUS:            SUM_SUBTRACT_PRIORITY,
+	token.MULTIPLY:         PROD_DIV_PRIORITY,
+	token.DIVIDE:           PROD_DIV_PRIORITY,
+	token.MODULO:           PROD_DIV_PRIORITY,
+	token.LESS_THAN:        COMPARISON_PRIORITY,
+	token.GREATER_THAN:     COMPARISON_PRIORITY,
+	token.EQUAL:            EQUALS_PRIORITY,
+	token.NOT_EQUAL:        EQUALS_PRIORITY,
+	token.LESS_OR_EQUAL:    EQUALS_PRIORITY,
+	token.GREATER_OR_EQUAL: EQUALS_PRIORITY,
 }
 
 type (
@@ -44,13 +49,17 @@ func (p *Parser) initNullDenotations() {
 
 func (p *Parser) initLeftDenotations() {
 	p.leds = map[token.TokenType]leftDenotation{
-		token.PLUS:         parseInfixExpression,
-		token.MINUS:        parseInfixExpression,
-		token.MULTIPLY:     parseInfixExpression,
-		token.DIVIDE:       parseInfixExpression,
-		token.MODULO:       parseInfixExpression,
-		token.LESS_THAN:    parseInfixExpression,
-		token.GREATER_THAN: parseInfixExpression,
+		token.PLUS:             parseInfixExpression,
+		token.MINUS:            parseInfixExpression,
+		token.MULTIPLY:         parseInfixExpression,
+		token.DIVIDE:           parseInfixExpression,
+		token.MODULO:           parseInfixExpression,
+		token.LESS_THAN:        parseInfixExpression,
+		token.GREATER_THAN:     parseInfixExpression,
+		token.EQUAL:            parseInfixExpression,
+		token.NOT_EQUAL:        parseInfixExpression,
+		token.LESS_OR_EQUAL:    parseInfixExpression,
+		token.GREATER_OR_EQUAL: parseInfixExpression,
 	}
 }
 

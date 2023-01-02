@@ -17,5 +17,5 @@ func (e *Error) Type() ObjectType {
 }
 
 func (e *Error) Inspect() string {
-	return "ERROR: " + e.Message
+	return "[ERROR] " + e.Message
 }

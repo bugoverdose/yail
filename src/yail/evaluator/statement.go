@@ -63,6 +63,9 @@ func evalBlockStatement(block *ast.BlockStatement, env *environment.Environment)
 		if isError(result) {
 			return result
 		}
+		if result == nil {
+			result = object.NULL
+		}
 	}
 	return result
 }

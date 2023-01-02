@@ -72,6 +72,8 @@ func TestEvalNullExpression(t *testing.T) {
 		{"null;"},
 		{"val x = null; x;"},
 		{"if (false) { 10 }"},
+		{"if (false) { 10 }"},
+		{"var y = 10; val z = if (true) { y = 15; }; z;"},
 	}
 
 	for _, tt := range tests {

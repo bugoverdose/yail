@@ -65,3 +65,47 @@ func (statement *ReassignmentStatement) String() string {
 	out.WriteString(";")
 	return out.String()
 }
+
+type BlockStatement struct {
+	Token      token.Token
+	Statements []Statement
+}
+
+func NewBlock(statements []Statement) *BlockStatement {
+	return &BlockStatement{
+		Token:      token.LEFT_BRACKET_TOKEN,
+		Statements: statements,
+	}
+}
+
+func (b *BlockStatement) statementNode() {}
+func (b *BlockStatement) TokenLiteral() string {
+	return b.Token.Literal
+}
+func (b *BlockStatement) String() string {
+	var out bytes.Buffer
+	for _, s := range b.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
+
+type ExpressionStatement struct {
+	Token      token.Token
+	Expression Expression
+}
+
+func NewExpressionStatement(tok token.Token, expr Expression) *ExpressionStatement {
+	return &ExpressionStatement{
+		Token:      tok,
+		Expression: expr,
+	}
+}
+
+func (statement *ExpressionStatement) statementNode() {}
+func (statement *ExpressionStatement) TokenLiteral() string {
+	return statement.Token.Literal
+}
+func (statement *ExpressionStatement) String() string {
+	return statement.Expression.String() + ";"
+}

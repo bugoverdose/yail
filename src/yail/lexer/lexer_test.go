@@ -52,7 +52,7 @@ func TestVariableBinding(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `if (x > y) { x } else { y };`
+	input := `if (x > y) { return x; } else { y };`
 	lexer := New(input)
 
 	tests := []struct {
@@ -66,12 +66,54 @@ func TestIfExpression(t *testing.T) {
 		{token.IDENTIFIER, "y"},
 		{token.RIGHT_PARENTHESIS, ")"},
 		{token.LEFT_BRACKET, "{"},
+		{token.RETURN, "return"},
 		{token.IDENTIFIER, "x"},
+		{token.SEMICOLON, ";"},
 		{token.RIGHT_BRACKET, "}"},
 		{token.ELSE, "else"},
 		{token.LEFT_BRACKET, "{"},
 		{token.IDENTIFIER, "y"},
 		{token.RIGHT_BRACKET, "}"},
+		{token.SEMICOLON, ";"},
+
+		{token.EOF, ""},
+	}
+
+	for _, tt := range tests {
+		tok := lexer.NextToken()
+		utils.ValidateValue(tok.Type, tt.expectedType, t)
+		utils.ValidateValue(tok.Literal, tt.expectedLiteral, t)
+	}
+}
+
+func TestFunctionExpression(t *testing.T) {
+	input := `callFunction(2, 3, func(x, y) { return x + y; });`
+	lexer := New(input)
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.IDENTIFIER, "callFunction"},
+		{token.LEFT_PARENTHESIS, "("},
+		{token.INTEGER, "2"},
+		{token.COMMA, ","},
+		{token.INTEGER, "3"},
+		{token.COMMA, ","},
+		{token.FUNCTION, "func"},
+		{token.LEFT_PARENTHESIS, "("},
+		{token.IDENTIFIER, "x"},
+		{token.COMMA, ","},
+		{token.IDENTIFIER, "y"},
+		{token.RIGHT_PARENTHESIS, ")"},
+		{token.LEFT_BRACKET, "{"},
+		{token.RETURN, "return"},
+		{token.IDENTIFIER, "x"},
+		{token.PLUS, "+"},
+		{token.IDENTIFIER, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RIGHT_BRACKET, "}"},
+		{token.RIGHT_PARENTHESIS, ")"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

@@ -25,6 +25,7 @@ const (
 	GREATER_OR_EQUAL = ">="
 
 	// Delimiters
+	COMMA             = ","
 	SEMICOLON         = ";"
 	LEFT_PARENTHESIS  = "("
 	RIGHT_PARENTHESIS = ")"
@@ -32,14 +33,15 @@ const (
 	RIGHT_BRACKET     = "}"
 
 	// Keywords
-	VAR    = "var"
-	VAL    = "val"
-	TRUE   = "true"
-	FALSE  = "false"
-	IF     = "if"
-	ELSE   = "else"
-	RETURN = "return"
-	NULL   = "null"
+	VAR      = "var"
+	VAL      = "val"
+	TRUE     = "true"
+	FALSE    = "false"
+	FUNCTION = "func"
+	IF       = "if"
+	ELSE     = "else"
+	RETURN   = "return"
+	NULL     = "null"
 )
 
 type Token struct {
@@ -48,22 +50,26 @@ type Token struct {
 }
 
 var (
-	EOF_TOKEN          = Token{Type: EOF, Literal: ""}
-	UNUSED_TOKEN       = New(ILLEGAL)
-	IF_TOKEN           = New(IF)
-	LEFT_BRACKET_TOKEN = New(LEFT_BRACKET)
-	NULL_TOKEN         = New(NULL)
+	EOF_TOKEN              = Token{Type: EOF, Literal: ""}
+	UNUSED_TOKEN           = New(ILLEGAL)
+	LEFT_PARENTHESIS_TOKEN = New(LEFT_PARENTHESIS)
+	LEFT_BRACKET_TOKEN     = New(LEFT_BRACKET)
+	IF_TOKEN               = New(IF)
+	FUNCTION_TOKEN         = New(FUNCTION)
+	RETURN_TOKEN           = New(RETURN)
+	NULL_TOKEN             = New(NULL)
 )
 
 var keywords = map[string]Token{
-	VAR:    New(VAR),
-	VAL:    New(VAL),
-	TRUE:   New(TRUE),
-	FALSE:  New(FALSE),
-	IF:     IF_TOKEN,
-	ELSE:   New(ELSE),
-	RETURN: New(RETURN),
-	NULL:   NULL_TOKEN,
+	VAR:      New(VAR),
+	VAL:      New(VAL),
+	TRUE:     New(TRUE),
+	FALSE:    New(FALSE),
+	FUNCTION: FUNCTION_TOKEN,
+	IF:       IF_TOKEN,
+	ELSE:     New(ELSE),
+	RETURN:   RETURN_TOKEN,
+	NULL:     NULL_TOKEN,
 }
 
 var SingleCharacterTokens = map[string]Token{
@@ -76,8 +82,9 @@ var SingleCharacterTokens = map[string]Token{
 	MODULO:            New(MODULO),
 	LESS_THAN:         New(LESS_THAN),
 	GREATER_THAN:      New(GREATER_THAN),
+	COMMA:             New(COMMA),
 	SEMICOLON:         New(SEMICOLON),
-	LEFT_PARENTHESIS:  New(LEFT_PARENTHESIS),
+	LEFT_PARENTHESIS:  LEFT_PARENTHESIS_TOKEN,
 	RIGHT_PARENTHESIS: New(RIGHT_PARENTHESIS),
 	LEFT_BRACKET:      LEFT_BRACKET_TOKEN,
 	RIGHT_BRACKET:     New(RIGHT_BRACKET),

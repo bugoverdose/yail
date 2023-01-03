@@ -51,6 +51,9 @@ func (p *Parser) parseStatement() ast.Statement {
 	if isReassignmentStatement(p) {
 		return parseReassignmentStatement(p)
 	}
+	if isReturnStatement(p) {
+		return parseReturnStatement(p)
+	}
 	return parseExpressionStatement(p)
 }
 

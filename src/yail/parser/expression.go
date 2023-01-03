@@ -14,6 +14,7 @@ const (
 	SUM_SUBTRACT_PRIORITY
 	PROD_DIV_PRIORITY
 	PREFIX_PRIORITY
+	FUNCTION_CALL_PRIORITY
 )
 
 var priorities = map[token.TokenType]int{
@@ -28,6 +29,7 @@ var priorities = map[token.TokenType]int{
 	token.NOT_EQUAL:        EQUALS_PRIORITY,
 	token.LESS_OR_EQUAL:    EQUALS_PRIORITY,
 	token.GREATER_OR_EQUAL: EQUALS_PRIORITY,
+	token.LEFT_PARENTHESIS: FUNCTION_CALL_PRIORITY,
 }
 
 type (
@@ -46,6 +48,7 @@ func (p *Parser) initNullDenotations() {
 		token.MINUS:            parsePrefixExpression,
 		token.LEFT_PARENTHESIS: parseGroupedExpression,
 		token.IF:               parseIfExpression,
+		token.FUNCTION:         parseFunctionLiteral,
 	}
 }
 
@@ -62,6 +65,7 @@ func (p *Parser) initLeftDenotations() {
 		token.NOT_EQUAL:        parseInfixExpression,
 		token.LESS_OR_EQUAL:    parseInfixExpression,
 		token.GREATER_OR_EQUAL: parseInfixExpression,
+		token.LEFT_PARENTHESIS: parseCallExpression, // function call: identifier(parameters)
 	}
 }
 
@@ -135,7 +139,7 @@ func parseBoolean(p *Parser) ast.Expression {
 	return ast.GetPooledBoolean(p.curTokenIs(token.TRUE))
 }
 
-func parseNull(p *Parser) ast.Expression {
+func parseNull(_ *Parser) ast.Expression {
 	return ast.NULL
 }
 
@@ -179,17 +183,56 @@ func parseIfExpression(p *Parser) ast.Expression {
 	return ast.NewIf(condition, consequence)
 }
 
-func parseBlockStatement(p *Parser) *ast.BlockStatement {
-	var statements []ast.Statement
-	p.nextToken()
-	for !p.curTokenIs(token.RIGHT_BRACKET) && !p.curTokenIs(token.EOF) {
-		stmt := p.parseStatement()
-		if stmt != nil {
-			statements = append(statements, stmt)
-		}
-		p.nextToken()
+func parseFunctionLiteral(p *Parser) ast.Expression {
+	if !p.nextTokenAndValidate(token.LEFT_PARENTHESIS) {
+		return nil
 	}
-	return ast.NewBlock(statements)
+	params := parseFunctionParameters(p)
+	if !p.nextTokenAndValidate(token.LEFT_BRACKET) {
+		return nil
+	}
+	body := parseBlockStatement(p)
+	return ast.NewFunctionLiteral(params, body)
+}
+
+func parseFunctionParameters(p *Parser) []*ast.IdentifierExpression {
+	var identifiers []*ast.IdentifierExpression
+	p.nextToken()
+	if p.curTokenIs(token.RIGHT_PARENTHESIS) {
+		return identifiers
+	}
+	identifiers = append(identifiers, ast.NewIdentifier(p.curToken))
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		identifiers = append(identifiers, ast.NewIdentifier(p.curToken))
+	}
+	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
+		return nil
+	}
+	return identifiers
+}
+
+func parseCallExpression(functionIdentifier ast.Expression, p *Parser) ast.Expression {
+	p.nextToken()
+	if p.curTokenIs(token.RIGHT_PARENTHESIS) {
+		return ast.NewFunctionCall(functionIdentifier, []ast.Expression{})
+	}
+	return ast.NewFunctionCall(functionIdentifier, parseCallArguments(p))
+}
+
+func parseCallArguments(p *Parser) []ast.Expression {
+	var args []ast.Expression
+	args = append(args, p.parseExpression(NO_PRIORITY))
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(NO_PRIORITY))
+	}
+	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
+		return nil
+	}
+	return args
 }
 
 func parseInfixExpression(leftNode ast.Expression, p *Parser) ast.Expression {

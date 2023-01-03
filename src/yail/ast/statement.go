@@ -66,6 +66,26 @@ func (statement *ReassignmentStatement) String() string {
 	return out.String()
 }
 
+type ReturnStatement struct {
+	Token       token.Token
+	ReturnValue Expression
+}
+
+func NewReturn(value Expression) *ReturnStatement {
+	return &ReturnStatement{
+		Token:       token.RETURN_TOKEN,
+		ReturnValue: value,
+	}
+}
+
+func (statement *ReturnStatement) statementNode() {}
+func (statement *ReturnStatement) TokenLiteral() string {
+	return statement.Token.Literal
+}
+func (statement *ReturnStatement) String() string {
+	return statement.ReturnValue.String() + ";"
+}
+
 type BlockStatement struct {
 	Token      token.Token
 	Statements []Statement

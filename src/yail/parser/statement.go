@@ -15,14 +15,11 @@ func parseVariableBindingStatement(p *Parser) *ast.VariableBindingStatement {
 		return nil
 	}
 	name := ast.NewIdentifierFrom(p.curToken.Literal)
-
 	if !p.nextTokenAndValidate(token.ASSIGN) {
 		return nil
 	}
-
 	p.nextToken()
 	value := p.parseExpression(NO_PRIORITY)
-
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil
 	}
@@ -39,16 +36,39 @@ func parseReassignmentStatement(p *Parser) *ast.ReassignmentStatement {
 		return nil
 	}
 	name := ast.NewIdentifierFrom(p.curToken.Literal)
-
 	if !p.nextTokenAndValidate(token.ASSIGN) {
 		return nil
 	}
-
 	p.nextToken()
 	value := p.parseExpression(NO_PRIORITY)
-
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil
 	}
 	return ast.NewReassignment(curToken, name, value)
+}
+
+func isReturnStatement(p *Parser) bool {
+	return p.curTokenIs(token.RETURN)
+}
+
+func parseReturnStatement(p *Parser) *ast.ReturnStatement {
+	p.nextToken()
+	returnValue := p.parseExpression(NO_PRIORITY)
+	if !p.nextTokenAndValidate(token.SEMICOLON) {
+		return nil
+	}
+	return ast.NewReturn(returnValue)
+}
+
+func parseBlockStatement(p *Parser) *ast.BlockStatement {
+	var statements []ast.Statement
+	p.nextToken()
+	for !p.curTokenIs(token.RIGHT_BRACKET) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			statements = append(statements, stmt)
+		}
+		p.nextToken()
+	}
+	return ast.NewBlock(statements)
 }

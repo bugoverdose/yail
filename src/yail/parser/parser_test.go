@@ -9,7 +9,7 @@ import (
 	"yail/utils"
 )
 
-func TestVariableBindingStatements(t *testing.T) {
+func TestVariableBindingStatement(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
@@ -32,6 +32,31 @@ func TestVariableBindingStatements(t *testing.T) {
 		testVariableBindingStatement(t, stmt, tt.expectedIdentifier)
 		actualValue := stmt.(*ast.VariableBindingStatement).Value
 		testLiteralExpression(t, actualValue, tt.expectedValue)
+	}
+}
+
+func TestReturnStatement(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue interface{}
+	}{
+		{"return 5;", 5},
+		{"return true;", true},
+		{"return foobar;", "foobar"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		validateNoParserErrors(t, p)
+
+		utils.ValidateValue(len(program.Statements), 1, t)
+		stmt := program.Statements[0]
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		utils.ValidateValue(ok, true, t)
+		utils.ValidateValue(returnStmt.TokenLiteral(), token.RETURN, t)
+		testLiteralExpression(t, returnStmt.ReturnValue, tt.expectedValue)
 	}
 }
 
@@ -59,7 +84,7 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
-func TestPrefixExpressions(t *testing.T) {
+func TestPrefixExpression(t *testing.T) {
 	prefixTests := []struct {
 		input    string
 		operator string
@@ -89,7 +114,7 @@ func TestPrefixExpressions(t *testing.T) {
 	}
 }
 
-func TestInfixExpressions(t *testing.T) {
+func TestInfixExpression(t *testing.T) {
 	infixTests := []struct {
 		input      string
 		leftValue  interface{}
@@ -146,7 +171,7 @@ func TestIfExpression(t *testing.T) {
 }
 
 func TestIfElseExpression(t *testing.T) {
-	input := `if (x < y) { x } else { y }`
+	input := `if (x < y) { return x; } else { y }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -162,14 +187,85 @@ func TestIfElseExpression(t *testing.T) {
 	testInfixExpression(t, expr.Condition, "x", "<", "y")
 
 	utils.ValidateValue(len(expr.Consequence.Statements), 1, t)
-	consequence, ok := expr.Consequence.Statements[0].(*ast.ExpressionStatement)
+	consequence, ok := expr.Consequence.Statements[0].(*ast.ReturnStatement)
 	utils.ValidateValue(ok, true, t)
-	testLiteralExpression(t, consequence.Expression, "x")
+	testLiteralExpression(t, consequence.ReturnValue, "x")
 
 	utils.ValidateValue(len(expr.Alternative.Statements), 1, t)
 	alternative, ok := expr.Alternative.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
 	testLiteralExpression(t, alternative.Expression, "y")
+}
+
+func TestFunctionLiteral(t *testing.T) {
+	input := `func(x, y) { x + y; }`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	utils.ValidateValue(len(program.Statements), 1, t)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+
+	function, ok := stmt.Expression.(*ast.FunctionLiteral)
+	utils.ValidateValue(ok, true, t)
+
+	utils.ValidateValue(len(function.Parameters), 2, t)
+	testLiteralExpression(t, function.Parameters[0], "x")
+	testLiteralExpression(t, function.Parameters[1], "y")
+
+	utils.ValidateValue(len(function.Body.Statements), 1, t)
+	bodyStmt, ok := function.Body.Statements[0].(*ast.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
+}
+
+func TestFunctionParameters(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{input: "func() {};", expectedParams: []string{}},
+		{input: "func(x) {};", expectedParams: []string{"x"}},
+		{input: "func(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		validateNoParserErrors(t, p)
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		function := stmt.Expression.(*ast.FunctionLiteral)
+		utils.ValidateValue(len(function.Parameters), len(tt.expectedParams), t)
+		for i, ident := range tt.expectedParams {
+			testLiteralExpression(t, function.Parameters[i], ident)
+		}
+	}
+}
+
+func TestFunctionCallExpression(t *testing.T) {
+	input := "add(1, 2 * 3, 4 + 5);"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	utils.ValidateValue(len(program.Statements), 1, t)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+
+	exp, ok := stmt.Expression.(*ast.CallExpression)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(exp.Function.String(), "add", t)
+	utils.ValidateValue(len(exp.Arguments), 3, t)
+	testLiteralExpression(t, exp.Arguments[0], 1)
+	testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
 }
 
 func TestOperationPriorities(t *testing.T) {
@@ -226,8 +322,8 @@ func TestOperationPriorities(t *testing.T) {
 			"((3 > 5) == false);",
 		},
 		{
-			"3 < 5 == true",
-			"((3 < 5) == true);",
+			"3 < 5 != true",
+			"((3 < 5) != true);",
 		},
 		{
 			"1 + (2 + 3) + 4",
@@ -256,6 +352,22 @@ func TestOperationPriorities(t *testing.T) {
 		{
 			"!true == true",
 			"((!true) == true);",
+		},
+		{
+			"a + add(b, c) * d",
+			"(a + (add(b, c) * d));",
+		},
+		{
+			"add(-func(x, y) { x - y; }, z)",
+			"add((-func(x, y) { (x - y); }), z);",
+		},
+		{
+			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)));",
+		},
+		{
+			"add(a + b + c * d / f + g)",
+			"add((((a + b) + ((c * d) / f)) + g));",
 		},
 	}
 

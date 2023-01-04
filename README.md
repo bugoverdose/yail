@@ -129,3 +129,71 @@ y; // null
 val z = if (true) { y = 15; };
 z; // null
 ```
+
+## Functions
+
+To support functional programming, all functions are first-class citizens in Yail.
+
+This means that they are expressions, so you must assign the function to an identifier to call them.
+
+```kotlin
+val f = func(x) { x + 3; };
+f(5); // 8
+f(6); // 9
+```
+
+This also means that it's possible to use higher order functions, functions that take another functions as arguments.
+
+```kotlin
+val callTwoTimes = func(x, f) { 
+    f(f(x)); 
+};
+
+callTwoTimes(2, func(x) { x * x; }); // 16
+callTwoTimes(3, func(x) { x * x; }); // 81
+callTwoTimes(1, func(x) { x + 10; }); // 21
+```
+
+### Scopes
+
+When you try to use an identifier inside a function body, evaluator looks up the identifier following these steps.
+
+1. If it's the name of a parameter or a variable declared inside the function, the evaluator uses the bound value.
+2. If it's not one of them, it searches the outer scope. 
+3. The 2nd step is repeated until it reaches the outermost scope. 
+
+```kotlin
+var i = 5; 
+val useLocalVariableI = func() {
+    return i;
+};
+val useLocalVariableInsideFunction = func() {
+    val i = 15;
+    return i;
+};
+val returnParameterI = func(i) {
+    return i;
+};
+
+useLocalVariableI(); // 5
+useLocalVariableInsideFunction(); // 15
+returnParameterI(10); // 10
+i; // 5
+
+i = 30;
+
+useLocalVariableI(); // 30
+useLocalVariableInsideFunction(); // 15
+returnParameterI(10); // 10
+i; // 30
+```
+
+However, you can not reassign the variables that was declared at the outer scope from inside the function.
+
+```kotlin
+var i = 5; 
+val reassignFunc = func() {
+    i = 10; 
+}; 
+reassignFunc(); // [ERROR] identifier not found: 'i'
+```

@@ -7,19 +7,28 @@ import (
 
 type Environment struct {
 	dataStorage map[string]value
+	outerScope  *Environment
 }
 
 func NewEnvironment() *Environment {
 	s := make(map[string]value)
-	return &Environment{dataStorage: s}
+	return &Environment{dataStorage: s, outerScope: nil}
+}
+
+func NewInnerEnvironment(outer *Environment) *Environment {
+	s := make(map[string]value)
+	return &Environment{dataStorage: s, outerScope: outer}
 }
 
 func (e *Environment) Get(name string) (object.Object, bool) {
 	obj, ok := e.dataStorage[name]
-	if !ok {
-		return nil, ok
+	if ok {
+		return obj.data, ok
 	}
-	return obj.data, ok
+	if e.outerScope != nil {
+		return e.outerScope.Get(name)
+	}
+	return nil, ok
 }
 
 func (e *Environment) ImmutableAssign(name string, val object.Object) (bool, *object.Error) {

@@ -28,6 +28,10 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 		return evalInfixExpression(node, env)
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+	case *ast.FunctionLiteral:
+		return environment.NewFunction(node, env)
+	case *ast.CallExpression:
+		return evalFunctionCall(node, env)
 	}
 	return nil
 }

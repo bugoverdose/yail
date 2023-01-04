@@ -15,6 +15,8 @@ func evalStatement(node ast.Statement, env *environment.Environment) object.Obje
 		return evalVariableBinding(node, env)
 	case *ast.ReassignmentStatement:
 		return evalReassignment(node, env)
+	case *ast.ReturnStatement:
+		return evalReturnStatement(node, env)
 	case *ast.BlockStatement:
 		return evalBlockStatement(node, env)
 	}
@@ -56,14 +58,24 @@ func evalReassignment(node *ast.ReassignmentStatement, env *environment.Environm
 	return nil
 }
 
+func evalReturnStatement(node *ast.ReturnStatement, env *environment.Environment) object.Object {
+	val := Eval(node.ReturnValue, env)
+	if isError(val) {
+		return val
+	}
+	return object.NewReturnValue(val)
+}
+
 func evalBlockStatement(block *ast.BlockStatement, env *environment.Environment) object.Object {
 	var result object.Object
 	for _, statement := range block.Statements {
 		result = Eval(statement, env)
-		if isError(result) {
+		switch result.(type) {
+		case *object.Error:
 			return result
-		}
-		if result == nil {
+		case *object.ReturnValue:
+			return result
+		case nil:
 			result = object.NULL
 		}
 	}

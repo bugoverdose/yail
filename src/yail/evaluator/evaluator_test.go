@@ -112,6 +112,25 @@ func TestReassignmentStatement(t *testing.T) {
 	}
 }
 
+func TestReturnStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"return 10; 9;", 10},
+		{"9; return 2 * 5; 9;", 10},
+		{"if (10 > 1) { return 10; }", 10},
+		{"if (10 > 1) { if (10 > 1) { return 10; } return 1;}", 10},
+		{"val f = func(x) { return x; x + 10; }; f(10);", 10},
+		{"val f = func(x) { val result = x + 10; return result; return 10;}; f(10);", 20},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestIfElseExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -135,6 +154,60 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
+func TestFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"val identity = func(x) { x; }; identity(5);", 5},
+		{"val identity = func(x) { return x; }; identity(5);", 5},
+		{"val double = func(x) { x * 2; }; double(5);", 10},
+		{"val add = func(x, y) { x + y; }; add(5, 5);", 10},
+		{"val add = func(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+		{"val callTwoTimes = func(x, f) { f(f(x)); }; callTwoTimes(2, func(x) { x * x; });", 16},
+		{"val callTwoTimes = func(x, f) { f(f(x)); }; callTwoTimes(3, func(x) { x * x; });", 81},
+		{"val callTwoTimes = func(x, f) { f(f(x)); }; callTwoTimes(1, func(x) { x + 10; });", 21},
+	}
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func TestNestedScopes(t *testing.T) {
+	bindings := `
+			var i = 5; 
+			val useLocalVariableI = func() { return i; }; 
+			val useLocalVariableInsideFunction = func() { val i = 15; return i; };
+			val returnParameterI = func(i) { return i; }; `
+
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"useLocalVariableI();", 5},
+		{"i = 30; useLocalVariableI();", 30},
+		{"useLocalVariableInsideFunction();", 15},
+		{"i = 30; useLocalVariableInsideFunction();", 15},
+		{"returnParameterI(10); i;", 5},
+		{"i = 30; returnParameterI(10); i;", 30},
+		{"returnParameterI(10);", 10},
+		{"i = 30; returnParameterI(10);", 10},
+	}
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(bindings+tt.input), tt.expected)
+	}
+}
+
+func TestClosures(t *testing.T) {
+	input := `
+			val newAdder = func(x) {
+			  func(y) { x + y };
+			};
+			val addTwo = newAdder(2);
+			addTwo(5);`
+	testIntegerObject(t, testEval(input), 7)
+}
+
 func TestErrorHandling(t *testing.T) {
 	tests := []struct {
 		input           string
@@ -143,6 +216,10 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"x",
 			"identifier not found: x",
+		},
+		{
+			"fn(10, 20)",
+			"identifier not found: fn",
 		},
 		{
 			"val a = 5; a = 10;",
@@ -159,6 +236,14 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"true + false; 5;",
 			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"!5; 10;",
+			"unknown operator: !INTEGER",
+		},
+		{
+			"var i = 5; val reassignFunc = func() { i = 10; }; reassignFunc();",
+			"identifier not found: 'i'",
 		},
 	}
 

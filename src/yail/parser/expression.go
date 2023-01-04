@@ -213,7 +213,12 @@ func parseFunctionParameters(p *Parser) []*ast.IdentifierExpression {
 	return identifiers
 }
 
-func parseCallExpression(functionIdentifier ast.Expression, p *Parser) ast.Expression {
+func parseCallExpression(function ast.Expression, p *Parser) ast.Expression {
+	functionIdentifier, ok := function.(*ast.IdentifierExpression)
+	if !ok {
+		msg := fmt.Sprintf("unsupported operation : %s(", functionIdentifier.Value)
+		p.errors = append(p.errors, msg)
+	}
 	p.nextToken()
 	if p.curTokenIs(token.RIGHT_PARENTHESIS) {
 		return ast.NewFunctionCall(functionIdentifier, []ast.Expression{})

@@ -23,8 +23,11 @@ func evalProgram(program *ast.Program, env *environment.Environment) object.Obje
 
 	for _, stmt := range program.Statements {
 		result = Eval(stmt, env)
-		if isError(result) {
+		switch result := result.(type) {
+		case *object.Error:
 			return result
+		case *object.ReturnValue:
+			return result.Unwrap()
 		}
 	}
 	return result

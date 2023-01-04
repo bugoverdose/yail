@@ -42,11 +42,11 @@ func (fl *FunctionLiteral) String() string {
 
 type CallExpression struct {
 	Token     token.Token
-	Function  Expression
+	Function  *IdentifierExpression
 	Arguments []Expression
 }
 
-func NewFunctionCall(functionIdentifier Expression, arguments []Expression) *CallExpression {
+func NewFunctionCall(functionIdentifier *IdentifierExpression, arguments []Expression) *CallExpression {
 	return &CallExpression{
 		Token:     token.LEFT_PARENTHESIS_TOKEN,
 		Function:  functionIdentifier,

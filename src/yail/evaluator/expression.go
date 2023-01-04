@@ -87,6 +87,8 @@ func evalInfixExpression(node *ast.InfixExpression, env *environment.Environment
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(node.Token, left, right)
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(node.Token, left, right)
 	case node.Token.Type == token.EQUAL:
 		return object.GetPooledBooleanObject(left == right)
 	case node.Token.Type == token.NOT_EQUAL:
@@ -124,6 +126,21 @@ func evalIntegerInfixExpression(infixToken token.Token, left, right object.Objec
 		return object.GetPooledBooleanObject(leftVal <= rightVal)
 	case token.GREATER_OR_EQUAL:
 		return object.GetPooledBooleanObject(leftVal >= rightVal)
+	default:
+		return object.NewError("unknown operator: %s %s %s", left.Type(), infixToken.Literal, right.Type())
+	}
+}
+
+func evalStringInfixExpression(infixToken token.Token, left, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	switch infixToken.Literal {
+	case token.PLUS:
+		return &object.String{Value: leftVal + rightVal}
+	case token.EQUAL:
+		return object.GetPooledBooleanObject(left == right)
+	case token.NOT_EQUAL:
+		return object.GetPooledBooleanObject(left != right)
 	default:
 		return object.NewError("unknown operator: %s %s %s", left.Type(), infixToken.Literal, right.Type())
 	}

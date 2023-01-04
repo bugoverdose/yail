@@ -38,6 +38,7 @@ func TestEvalStringExpression(t *testing.T) {
 		expected string
 	}{
 		{`"Hello World!"`, "Hello World!"},
+		{`"Hello" + "World"`, "HelloWorld"},
 		{`""`, ""},
 	}
 
@@ -73,6 +74,8 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"5 <= 6", true},
 		{"5 >= 5", true},
 		{"5 >= 6", false},
+		{`"Hello" == "Hello"`, false},
+		{`"Hello" != "Hello"`, true},
 	}
 
 	for _, tt := range tests {
@@ -260,6 +263,10 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"var i = 5; val reassignFunc = func() { i = 10; }; reassignFunc();",
 			"identifier not found: 'i'",
+		},
+		{
+			`"Hello" - "World"`,
+			"unknown operator: STRING - STRING",
 		},
 	}
 

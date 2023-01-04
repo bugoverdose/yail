@@ -4,12 +4,12 @@ import "yail/token"
 
 const NULL_OBJ = "NULL"
 
-type Null struct {
-}
-
 var (
 	NULL = &Null{}
 )
+
+type Null struct {
+}
 
 func (n *Null) Type() ObjectType {
 	return NULL_OBJ

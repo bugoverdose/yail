@@ -7,11 +7,6 @@ import (
 	"yail/token"
 )
 
-var (
-	TRUE  = &object.Boolean{Value: true}
-	FALSE = &object.Boolean{Value: false}
-)
-
 func evalExpression(node ast.Expression, env *environment.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.IdentifierExpression:
@@ -19,7 +14,7 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 	case *ast.IntegerLiteralExpression:
 		return object.NewInteger(node.Value)
 	case *ast.BooleanExpression:
-		return getPooledBooleanObject(node.Value)
+		return object.GetPooledBooleanObject(node.Value)
 	case *ast.NullExpression:
 		return object.NULL
 	case *ast.PrefixExpression:
@@ -44,13 +39,6 @@ func evalIdentifier(node *ast.IdentifierExpression, env *environment.Environment
 	return val
 }
 
-func getPooledBooleanObject(input bool) *object.Boolean {
-	if input {
-		return TRUE
-	}
-	return FALSE
-}
-
 func evalPrefixExpression(node *ast.PrefixExpression, env *environment.Environment) object.Object {
 	right := Eval(node.RightNode, env)
 	if isError(right) {
@@ -68,10 +56,10 @@ func evalPrefixExpression(node *ast.PrefixExpression, env *environment.Environme
 
 func evalNotOperatorExpression(right object.Object) object.Object {
 	switch right {
-	case TRUE:
-		return FALSE
-	case FALSE:
-		return TRUE
+	case object.TRUE:
+		return object.FALSE
+	case object.FALSE:
+		return object.TRUE
 	default:
 		return object.NewError("unknown operator: !%s", right.Type())
 	}
@@ -98,9 +86,9 @@ func evalInfixExpression(node *ast.InfixExpression, env *environment.Environment
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(node.Token, left, right)
 	case node.Token.Type == token.EQUAL:
-		return getPooledBooleanObject(left == right)
+		return object.GetPooledBooleanObject(left == right)
 	case node.Token.Type == token.NOT_EQUAL:
-		return getPooledBooleanObject(left != right)
+		return object.GetPooledBooleanObject(left != right)
 	case left.Type() != right.Type():
 		return object.NewError("type mismatch: %s %s %s", left.Type(), node.Operator, right.Type())
 	default:
@@ -123,17 +111,17 @@ func evalIntegerInfixExpression(infixToken token.Token, left, right object.Objec
 	case token.MODULO:
 		return object.NewInteger(leftVal % rightVal)
 	case token.LESS_THAN:
-		return getPooledBooleanObject(leftVal < rightVal)
+		return object.GetPooledBooleanObject(leftVal < rightVal)
 	case token.GREATER_THAN:
-		return getPooledBooleanObject(leftVal > rightVal)
+		return object.GetPooledBooleanObject(leftVal > rightVal)
 	case token.EQUAL:
-		return getPooledBooleanObject(leftVal == rightVal)
+		return object.GetPooledBooleanObject(leftVal == rightVal)
 	case token.NOT_EQUAL:
-		return getPooledBooleanObject(leftVal != rightVal)
+		return object.GetPooledBooleanObject(leftVal != rightVal)
 	case token.LESS_OR_EQUAL:
-		return getPooledBooleanObject(leftVal <= rightVal)
+		return object.GetPooledBooleanObject(leftVal <= rightVal)
 	case token.GREATER_OR_EQUAL:
-		return getPooledBooleanObject(leftVal >= rightVal)
+		return object.GetPooledBooleanObject(leftVal >= rightVal)
 	default:
 		return object.NewError("unknown operator: %s %s %s", left.Type(), infixToken.Literal, right.Type())
 	}
@@ -144,10 +132,10 @@ func evalIfExpression(expression *ast.IfExpression, env *environment.Environment
 	if isError(condition) {
 		return condition
 	}
-	if condition == TRUE {
+	if condition == object.TRUE {
 		return Eval(expression.Consequence, env)
 	}
-	if condition == FALSE && expression.Alternative != nil {
+	if condition == object.FALSE && expression.Alternative != nil {
 		return Eval(expression.Alternative, env)
 	}
 	return object.NULL

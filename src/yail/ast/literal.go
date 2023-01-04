@@ -27,6 +27,23 @@ func (il *IntegerLiteralExpression) String() string {
 	return il.Token.Literal
 }
 
+type StringLiteralExpression struct {
+	Token token.Token
+	Value string
+}
+
+func NewStringLiteral(tok token.Token) *StringLiteralExpression {
+	return &StringLiteralExpression{Token: tok, Value: tok.Literal}
+}
+
+func (sl *StringLiteralExpression) expressionNode() {}
+func (sl *StringLiteralExpression) TokenLiteral() string {
+	return sl.Token.Literal
+}
+func (sl *StringLiteralExpression) String() string {
+	return sl.Token.Literal
+}
+
 type BooleanExpression struct {
 	Token token.Token
 	Value bool

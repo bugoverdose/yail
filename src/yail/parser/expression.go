@@ -41,6 +41,7 @@ func (p *Parser) initNullDenotations() {
 	p.nuds = map[token.TokenType]nullDenotation{
 		token.IDENTIFIER:       parseIdentifier,
 		token.INTEGER:          parseIntegerLiteral,
+		token.STRING:           parseStringLiteral,
 		token.TRUE:             parseBoolean,
 		token.FALSE:            parseBoolean,
 		token.NULL:             parseNull,
@@ -133,6 +134,10 @@ func parseIntegerLiteral(p *Parser) ast.Expression {
 		return nil
 	}
 	return ast.NewIntegerLiteral(p.curToken, value)
+}
+
+func parseStringLiteral(p *Parser) ast.Expression {
+	return ast.NewStringLiteral(p.curToken)
 }
 
 func parseBoolean(p *Parser) ast.Expression {

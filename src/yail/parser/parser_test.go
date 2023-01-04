@@ -85,6 +85,21 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
+func TestStringExpression(t *testing.T) {
+	input := `"hello world";`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	utils.ValidateValue(len(program.Statements), 1, t)
+	literal, ok := stmt.Expression.(*ast.StringLiteralExpression)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(literal.Value, "hello world", t)
+}
+
 func TestPrefixExpression(t *testing.T) {
 	prefixTests := []struct {
 		input    string

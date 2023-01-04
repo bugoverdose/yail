@@ -13,6 +13,8 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 		return evalIdentifier(node, env)
 	case *ast.IntegerLiteralExpression:
 		return object.NewInteger(node.Value)
+	case *ast.StringLiteralExpression:
+		return object.NewString(node.Value)
 	case *ast.BooleanExpression:
 		return object.GetPooledBooleanObject(node.Value)
 	case *ast.NullExpression:

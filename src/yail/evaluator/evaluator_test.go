@@ -32,6 +32,22 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 }
 
+func TestEvalStringExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"Hello World!"`, "Hello World!"},
+		{`""`, ""},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		str, _ := evaluated.(*object.String)
+		utils.ValidateValue(str.Value, tt.expected, t)
+	}
+}
+
 func TestEvalBooleanExpression(t *testing.T) {
 	tests := []struct {
 		input    string

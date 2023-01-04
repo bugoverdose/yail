@@ -28,6 +28,9 @@ func (lexer *Lexer) NextToken() token.Token {
 	if IsDigit(lexer.curChar) {
 		return token.NewInteger(lexer.readNumber())
 	}
+	if lexer.curChar == '"' {
+		return lexer.readString()
+	}
 	return lexer.toSpecialCharacterToken()
 }
 
@@ -87,4 +90,16 @@ func (lexer *Lexer) readNumber() string {
 		lexer.readNextChar()
 	}
 	return lexer.sourceCode[curPosition:lexer.curPosition]
+}
+
+func (lexer *Lexer) readString() token.Token {
+	startPosition := lexer.curPosition + 1
+	for {
+		lexer.readNextChar()
+		if lexer.curChar == '"' || lexer.curChar == EOF_CHAR {
+			lexer.readNextChar()
+			break
+		}
+	}
+	return token.NewString(lexer.sourceCode[startPosition : lexer.curPosition-1])
 }

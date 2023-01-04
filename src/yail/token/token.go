@@ -8,6 +8,7 @@ const (
 
 	IDENTIFIER = "IDENTIFIER"      // x, y, ...
 	INTEGER    = "INTEGER_LITERAL" // 1, 2, 10, ...
+	STRING     = "STRING"
 
 	// Operators
 	ASSIGN           = "="
@@ -103,6 +104,10 @@ func New(tokenType TokenType) Token {
 
 func NewInteger(literal string) Token {
 	return Token{Type: INTEGER, Literal: literal}
+}
+
+func NewString(literal string) Token {
+	return Token{Type: STRING, Literal: literal}
 }
 
 func NewKeywordOrIdentifier(literal string) Token {

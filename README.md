@@ -142,7 +142,7 @@ f(5); // 8
 f(6); // 9
 ```
 
-This also means that it's possible to use higher order functions, functions that take another functions as arguments.
+This also means that it's possible to implement higher order functions, functions that take another functions as arguments or return a function.
 
 ```kotlin
 val callTwoTimes = func(x, f) { 
@@ -196,4 +196,21 @@ val reassignFunc = func() {
     i = 10; 
 }; 
 reassignFunc(); // [ERROR] identifier not found: 'i'
+```
+
+### Closures
+
+Yail also supports closures, functions that captures the environment on the moment it was declared.
+
+For example, `closure` function captures the environment that binds the `x` identifier to the argument `2` when `higherOrderFunc` function is called. After that, when `closure` function is called, it uses the captured environment instead of using the environment of the scope it is being called. Therefore, `closure` function still interprets `x` as `2`, even though `x` is bound `1000` on the scope it is being called.
+
+```kotlin
+val higherOrderFunc = func(x) {
+    func(y) { x + y };
+};
+
+val closure = higherOrderFunc(2);
+val x = 1000;
+closure(5); // 7
+x; // 1000
 ```

@@ -40,6 +40,7 @@ func TestReturnStatement(t *testing.T) {
 		input         string
 		expectedValue interface{}
 	}{
+		{"return;", nil},
 		{"return 5;", 5},
 		{"return true;", true},
 		{"return foobar;", "foobar"},

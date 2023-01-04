@@ -53,6 +53,9 @@ func isReturnStatement(p *Parser) bool {
 
 func parseReturnStatement(p *Parser) *ast.ReturnStatement {
 	p.nextToken()
+	if p.curTokenIs(token.SEMICOLON) {
+		return ast.NewReturn(ast.NULL)
+	}
 	returnValue := p.parseExpression(NO_PRIORITY)
 	if !p.nextTokenAndValidate(token.SEMICOLON) {
 		return nil

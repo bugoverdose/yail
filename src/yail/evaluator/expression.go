@@ -34,11 +34,13 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 }
 
 func evalIdentifier(node *ast.IdentifierExpression, env *environment.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return object.NewError("identifier not found: " + node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-	return val
+	if builtin, ok := builtinFunctions[node.Value]; ok {
+		return builtin
+	}
+	return object.NewError("identifier not found: " + node.Value)
 }
 
 func evalPrefixExpression(node *ast.PrefixExpression, env *environment.Environment) object.Object {

@@ -227,6 +227,21 @@ func TestClosures(t *testing.T) {
 	testIntegerObject(t, testEval(input), 7)
 }
 
+func TestEvalBuiltinFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("Hello World")`, 11},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestErrorHandling(t *testing.T) {
 	tests := []struct {
 		input           string
@@ -267,6 +282,15 @@ func TestErrorHandling(t *testing.T) {
 		{
 			`"Hello" - "World"`,
 			"unknown operator: STRING - STRING",
+		},
+		{
+			`len(1)`,
+			"len(INTEGER) not supported",
+		},
+
+		{
+			`len("one", "two")`,
+			"wrong number of arguments: expected 1, but received 2",
 		},
 	}
 

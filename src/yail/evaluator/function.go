@@ -6,6 +6,22 @@ import (
 	"yail/object"
 )
 
+var builtinFunctions = map[string]*object.Builtin{
+	"len": {
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return object.NewError("wrong number of arguments: expected 1, but received %d", len(args))
+			}
+			switch arg := args[0].(type) {
+			case *object.String:
+				return &object.Integer{Value: int64(len(arg.Value))}
+			default:
+				return object.NewError("len(%s) not supported", arg.Type())
+			}
+		},
+	},
+}
+
 func evalFunctionCall(node *ast.CallExpression, env *environment.Environment) object.Object {
 	boundFunctionFromEnv := Eval(node.Function, env)
 	if isError(boundFunctionFromEnv) {
@@ -31,13 +47,16 @@ func evalArguments(node *ast.CallExpression, env *environment.Environment) []obj
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*environment.Function)
-	if !ok {
+	switch function := fn.(type) {
+	case *environment.Function:
+		innerEnv := createInnerScopeEnvironment(function, args)
+		evaluated := Eval(function.Body, innerEnv)
+		return unwrapReturnValue(evaluated)
+	case *object.Builtin:
+		return function.Fn(args...)
+	default:
 		return object.NewError("failed to invoke %s as a function", fn.Type())
 	}
-	innerEnv := createInnerScopeEnvironment(function, args)
-	evaluated := Eval(function.Body, innerEnv)
-	return unwrapReturnValue(evaluated)
 }
 
 func createInnerScopeEnvironment(fn *environment.Function, args []object.Object) *environment.Environment {

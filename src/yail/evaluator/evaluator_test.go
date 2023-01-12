@@ -28,7 +28,7 @@ func TestEvalIntegerExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := testEval(tt.input)
-		testIntegerObject(t, actual, tt.expected)
+		testObject(t, actual, tt.expected)
 	}
 }
 
@@ -80,7 +80,7 @@ func TestEvalBooleanExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-		testBooleanObject(t, evaluated, tt.expected)
+		testObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -112,7 +112,7 @@ func TestVariableBindingStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := testEval(tt.input)
-		testIntegerObject(t, actual, tt.expected)
+		testObject(t, actual, tt.expected)
 	}
 }
 
@@ -127,7 +127,7 @@ func TestReassignmentStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := testEval(tt.input)
-		testIntegerObject(t, actual, tt.expected)
+		testObject(t, actual, tt.expected)
 	}
 }
 
@@ -146,7 +146,7 @@ func TestReturnStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		testObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -166,7 +166,7 @@ func TestIfElseExpression(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		if tt.expected != nil {
-			testIntegerObject(t, evaluated, int64(tt.expected.(int)))
+			testObject(t, evaluated, int64(tt.expected.(int)))
 		} else {
 			utils.ValidateObject(evaluated, object.NULL, t)
 		}
@@ -188,7 +188,7 @@ func TestFunction(t *testing.T) {
 		{"val callTwoTimes = func(x, f) { f(f(x)); }; callTwoTimes(1, func(x) { x + 10; });", 21},
 	}
 	for _, tt := range tests {
-		testIntegerObject(t, testEval(tt.input), tt.expected)
+		testObject(t, testEval(tt.input), tt.expected)
 	}
 }
 
@@ -213,7 +213,7 @@ func TestNestedScopes(t *testing.T) {
 		{"i = 30; returnParameterI(10);", 10},
 	}
 	for _, tt := range tests {
-		testIntegerObject(t, testEval(bindings+tt.input), tt.expected)
+		testObject(t, testEval(bindings+tt.input), tt.expected)
 	}
 }
 
@@ -224,7 +224,7 @@ func TestClosures(t *testing.T) {
 			};
 			val addTwo = newAdder(2);
 			addTwo(5);`
-	testIntegerObject(t, testEval(input), 7)
+	testObject(t, testEval(input), 7)
 }
 
 func TestEvalBuiltinFunction(t *testing.T) {
@@ -238,7 +238,7 @@ func TestEvalBuiltinFunction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		testObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -308,10 +308,19 @@ func testEval(input string) object.Object {
 	return Eval(program, env)
 }
 
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
-	utils.ValidateObject(obj, object.NewInteger(expected), t)
-}
-
-func testBooleanObject(t *testing.T, obj object.Object, expected bool) {
-	utils.ValidateObject(obj, &object.Boolean{Value: expected}, t)
+func testObject(
+	t *testing.T,
+	actual object.Object,
+	expected interface{},
+) {
+	switch v := expected.(type) {
+	case int64:
+		utils.ValidateObject(actual, object.NewInteger(v), t)
+	case bool:
+		utils.ValidateObject(actual, object.GetPooledBooleanObject(v), t)
+	case nil:
+		utils.ValidateObject(actual, object.NULL, t)
+	default:
+		t.Errorf("Failed to handle %T.", v)
+	}
 }

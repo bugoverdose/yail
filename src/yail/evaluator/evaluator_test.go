@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"testing"
 	"yail/environment"
 	"yail/lexer"
@@ -313,7 +314,12 @@ func testObject(
 	actual object.Object,
 	expected interface{},
 ) {
+	if v, ok := actual.(*object.Error); ok {
+		fmt.Printf("%+v", v.Message)
+	}
 	switch v := expected.(type) {
+	case int:
+		utils.ValidateObject(actual, object.NewInteger(int64(v)), t)
 	case int64:
 		utils.ValidateObject(actual, object.NewInteger(v), t)
 	case bool:

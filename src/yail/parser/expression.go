@@ -173,13 +173,13 @@ func parseIfExpression(p *Parser) ast.Expression {
 	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
 		return nil
 	}
-	if !p.nextTokenAndValidate(token.LEFT_BRACKET) {
+	if !p.nextTokenAndValidate(token.LEFT_BRACE) {
 		return nil
 	}
 	consequence := parseBlockStatement(p)
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
-		if !p.nextTokenAndValidate(token.LEFT_BRACKET) {
+		if !p.nextTokenAndValidate(token.LEFT_BRACE) {
 			return nil
 		}
 		alternative := parseBlockStatement(p)
@@ -193,7 +193,7 @@ func parseFunctionLiteral(p *Parser) ast.Expression {
 		return nil
 	}
 	params := parseFunctionParameters(p)
-	if !p.nextTokenAndValidate(token.LEFT_BRACKET) {
+	if !p.nextTokenAndValidate(token.LEFT_BRACE) {
 		return nil
 	}
 	body := parseBlockStatement(p)

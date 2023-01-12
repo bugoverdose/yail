@@ -93,7 +93,7 @@ type BlockStatement struct {
 
 func NewBlock(statements []Statement) *BlockStatement {
 	return &BlockStatement{
-		Token:      token.LEFT_BRACKET_TOKEN,
+		Token:      token.LEFT_BRACE_TOKEN,
 		Statements: statements,
 	}
 }

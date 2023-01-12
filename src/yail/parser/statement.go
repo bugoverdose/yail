@@ -66,7 +66,7 @@ func parseReturnStatement(p *Parser) *ast.ReturnStatement {
 func parseBlockStatement(p *Parser) *ast.BlockStatement {
 	var statements []ast.Statement
 	p.nextToken()
-	for !p.curTokenIs(token.RIGHT_BRACKET) && !p.curTokenIs(token.EOF) {
+	for !p.curTokenIs(token.RIGHT_BRACE) && !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			statements = append(statements, stmt)

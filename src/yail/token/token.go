@@ -30,8 +30,8 @@ const (
 	SEMICOLON         = ";"
 	LEFT_PARENTHESIS  = "("
 	RIGHT_PARENTHESIS = ")"
-	LEFT_BRACKET      = "{"
-	RIGHT_BRACKET     = "}"
+	LEFT_BRACE        = "{"
+	RIGHT_BRACE       = "}"
 
 	// Keywords
 	VAR      = "var"
@@ -54,7 +54,7 @@ var (
 	EOF_TOKEN              = Token{Type: EOF, Literal: ""}
 	UNUSED_TOKEN           = New(ILLEGAL)
 	LEFT_PARENTHESIS_TOKEN = New(LEFT_PARENTHESIS)
-	LEFT_BRACKET_TOKEN     = New(LEFT_BRACKET)
+	LEFT_BRACE_TOKEN       = New(LEFT_BRACE)
 	IF_TOKEN               = New(IF)
 	FUNCTION_TOKEN         = New(FUNCTION)
 	RETURN_TOKEN           = New(RETURN)
@@ -87,8 +87,8 @@ var SingleCharacterTokens = map[string]Token{
 	SEMICOLON:         New(SEMICOLON),
 	LEFT_PARENTHESIS:  LEFT_PARENTHESIS_TOKEN,
 	RIGHT_PARENTHESIS: New(RIGHT_PARENTHESIS),
-	LEFT_BRACKET:      LEFT_BRACKET_TOKEN,
-	RIGHT_BRACKET:     New(RIGHT_BRACKET),
+	LEFT_BRACE:        LEFT_BRACE_TOKEN,
+	RIGHT_BRACE:       New(RIGHT_BRACE),
 }
 
 var TwoCharacterTokens = map[string]Token{

@@ -1,6 +1,31 @@
 # YAIL: Yet Another Interpreted Language
 
-YAIL is a simple interpreted language built with Go.
+Yail is a simple interpreted language built with Go.
+
+## Quick Start (for Mac)
+
+Run the following command in your terminal for quick installation.
+
+```shell
+curl -o /usr/local/bin/yail 'https://raw.githubusercontent.com/bugoverdose/yail/master/build/yail' && chmod 755 /usr/local/bin/yail
+```
+
+After installation, you can just run `yail` anywhere to start the *interactive mode*. 
+To exit the *interactive mode*, just type `q` or `exit` command and press enter.
+Copy and paste each of the lines below to if you are stuck.
+
+```shell
+yail
+val x = "Hello World!";
+x;
+exit
+```
+
+If you want to delete the program, just run the command below.
+
+```shell
+rm -rf /usr/local/bin/yail
+```
 
 ## Variables
 
@@ -165,11 +190,11 @@ popleft(arr); arr; // [1, 2, 3]
 
 ### Hash Map
 
-A hash map consists of multiple key-value pairs wrapped by curly brackets(`{`, `}`). 
+A hash map consists of multiple key-value pairs wrapped by curly brackets(`{`, `}`).
 Only hashable data types can be used for keys, which are strings, integers, and booleans.
 Any data type can be used for values including arrays, functions, and another hash maps.
 
-Each value can be accessed based on the corresponding key. 
+Each value can be accessed based on the corresponding key.
 If the given key does not exist, null would be returned instead of throwing an error.
 
 ```kotlin

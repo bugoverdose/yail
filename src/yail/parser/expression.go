@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"strconv"
 	"yail/ast"
 	"yail/token"
 )
@@ -38,42 +37,6 @@ type (
 	nullDenotation func(p *Parser) ast.Expression
 	leftDenotation func(e ast.Expression, p *Parser) ast.Expression
 )
-
-func (p *Parser) initNullDenotations() {
-	p.nuds = map[token.TokenType]nullDenotation{
-		token.IDENTIFIER:       parseIdentifier,
-		token.INTEGER:          parseIntegerLiteral,
-		token.STRING:           parseStringLiteral,
-		token.TRUE:             parseBoolean,
-		token.FALSE:            parseBoolean,
-		token.NULL:             parseNull,
-		token.NOT:              parsePrefixExpression,
-		token.MINUS:            parsePrefixExpression,
-		token.LEFT_PARENTHESIS: parseGroupedExpression,
-		token.IF:               parseIfExpression,
-		token.FUNCTION:         parseFunctionLiteral,
-		token.LEFT_BRACKET:     parseArrayLiteral,
-		token.LEFT_BRACE:       parseHashLiteral,
-	}
-}
-
-func (p *Parser) initLeftDenotations() {
-	p.leds = map[token.TokenType]leftDenotation{
-		token.PLUS:             parseInfixExpression,
-		token.MINUS:            parseInfixExpression,
-		token.MULTIPLY:         parseInfixExpression,
-		token.DIVIDE:           parseInfixExpression,
-		token.MODULO:           parseInfixExpression,
-		token.LESS_THAN:        parseInfixExpression,
-		token.GREATER_THAN:     parseInfixExpression,
-		token.EQUAL:            parseInfixExpression,
-		token.NOT_EQUAL:        parseInfixExpression,
-		token.LESS_OR_EQUAL:    parseInfixExpression,
-		token.GREATER_OR_EQUAL: parseInfixExpression,
-		token.LEFT_PARENTHESIS: parseCallExpression, // function call: identifier(parameters)
-		token.LEFT_BRACKET:     parseIndexExpression,
-	}
-}
 
 func parseExpressionStatement(p *Parser) *ast.ExpressionStatement {
 	stmt := ast.NewExpressionStatement(p.curToken, p.parseExpression(NO_PRIORITY))
@@ -127,126 +90,6 @@ func (p *Parser) getNextTokenPriority() int {
 	return NO_PRIORITY
 }
 
-func parseIdentifier(p *Parser) ast.Expression {
-	return ast.NewIdentifier(p.curToken)
-}
-
-func parseIntegerLiteral(p *Parser) ast.Expression {
-	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
-	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
-		p.errors = append(p.errors, msg)
-		return nil
-	}
-	return ast.NewIntegerLiteral(p.curToken, value)
-}
-
-func parseStringLiteral(p *Parser) ast.Expression {
-	return ast.NewStringLiteral(p.curToken)
-}
-
-func parseBoolean(p *Parser) ast.Expression {
-	return ast.GetPooledBoolean(p.curTokenIs(token.TRUE))
-}
-
-func parseNull(_ *Parser) ast.Expression {
-	return ast.NULL
-}
-
-func parsePrefixExpression(p *Parser) ast.Expression {
-	prefixToken := p.curToken
-	p.nextToken()
-	rightNode := p.parseExpression(PREFIX_PRIORITY)
-	return ast.NewPrefix(prefixToken, rightNode)
-}
-
-func parseGroupedExpression(p *Parser) ast.Expression {
-	p.nextToken()
-	exp := p.parseExpression(NO_PRIORITY) // always parse inside the `(~)` first
-	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
-		return nil
-	}
-	return exp
-}
-
-func parseIfExpression(p *Parser) ast.Expression {
-	if !p.nextTokenAndValidate(token.LEFT_PARENTHESIS) {
-		return nil
-	}
-	p.nextToken()
-	condition := p.parseExpression(NO_PRIORITY)
-	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
-		return nil
-	}
-	if !p.nextTokenAndValidate(token.LEFT_BRACE) {
-		return nil
-	}
-	consequence := parseBlockStatement(p)
-	if p.peekTokenIs(token.ELSE) {
-		p.nextToken()
-		if !p.nextTokenAndValidate(token.LEFT_BRACE) {
-			return nil
-		}
-		alternative := parseBlockStatement(p)
-		return ast.NewIfElse(condition, consequence, alternative)
-	}
-	return ast.NewIf(condition, consequence)
-}
-
-func parseFunctionLiteral(p *Parser) ast.Expression {
-	if !p.nextTokenAndValidate(token.LEFT_PARENTHESIS) {
-		return nil
-	}
-	params := parseFunctionParameters(p)
-	if !p.nextTokenAndValidate(token.LEFT_BRACE) {
-		return nil
-	}
-	body := parseBlockStatement(p)
-	return ast.NewFunctionLiteral(params, body)
-}
-
-func parseFunctionParameters(p *Parser) []*ast.IdentifierExpression {
-	var identifiers []*ast.IdentifierExpression
-	p.nextToken()
-	if p.curTokenIs(token.RIGHT_PARENTHESIS) {
-		return identifiers
-	}
-	identifiers = append(identifiers, ast.NewIdentifier(p.curToken))
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
-		p.nextToken()
-		identifiers = append(identifiers, ast.NewIdentifier(p.curToken))
-	}
-	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
-		return nil
-	}
-	return identifiers
-}
-
-func parseCallExpression(function ast.Expression, p *Parser) ast.Expression {
-	functionIdentifier, ok := function.(*ast.IdentifierExpression)
-	if !ok {
-		msg := fmt.Sprintf("unsupported operation : %s(", functionIdentifier.Value)
-		p.errors = append(p.errors, msg)
-	}
-	args := parseElements(token.RIGHT_PARENTHESIS, p)
-	return ast.NewFunctionCall(functionIdentifier, args)
-}
-
-func parseArrayLiteral(p *Parser) ast.Expression {
-	elements := parseElements(token.RIGHT_BRACKET, p)
-	return ast.NewArrayLiteral(elements)
-}
-
-func parseIndexExpression(left ast.Expression, p *Parser) ast.Expression {
-	p.nextToken()
-	index := p.parseExpression(NO_PRIORITY)
-	if !p.nextTokenAndValidate(token.RIGHT_BRACKET) {
-		return nil
-	}
-	return ast.NewCollectionAccess(left, index)
-}
-
 func parseElements(end token.TokenType, p *Parser) []ast.Expression {
 	var elements []ast.Expression
 	p.nextToken()
@@ -263,33 +106,4 @@ func parseElements(end token.TokenType, p *Parser) []ast.Expression {
 		return nil
 	}
 	return elements
-}
-
-func parseHashLiteral(p *Parser) ast.Expression {
-	pairs := make(map[ast.Expression]ast.Expression)
-	for !p.peekTokenIs(token.RIGHT_BRACE) {
-		p.nextToken()
-		key := p.parseExpression(NO_PRIORITY)
-		if !p.nextTokenAndValidate(token.COLON) {
-			return nil
-		}
-		p.nextToken()
-		value := p.parseExpression(NO_PRIORITY)
-		pairs[key] = value
-		if !p.peekTokenIs(token.RIGHT_BRACE) && !p.nextTokenAndValidate(token.COMMA) {
-			return nil
-		}
-	}
-	if !p.nextTokenAndValidate(token.RIGHT_BRACE) {
-		return nil
-	}
-	return ast.NewHashMapLiteral(pairs)
-}
-
-func parseInfixExpression(leftNode ast.Expression, p *Parser) ast.Expression {
-	infixToken := p.curToken
-	priority := p.getCurTokenPriority()
-	p.nextToken()
-	rightNode := p.parseExpression(priority)
-	return ast.NewInfix(leftNode, infixToken, rightNode)
 }

@@ -32,6 +32,8 @@ const (
 	RIGHT_PARENTHESIS = ")"
 	LEFT_BRACE        = "{"
 	RIGHT_BRACE       = "}"
+	LEFT_BRACKET      = "["
+	RIGHT_BRACKET     = "]"
 
 	// Keywords
 	VAR      = "var"
@@ -55,6 +57,7 @@ var (
 	UNUSED_TOKEN           = New(ILLEGAL)
 	LEFT_PARENTHESIS_TOKEN = New(LEFT_PARENTHESIS)
 	LEFT_BRACE_TOKEN       = New(LEFT_BRACE)
+	LEFT_BRACKET_TOKEN     = New(LEFT_BRACKET)
 	IF_TOKEN               = New(IF)
 	FUNCTION_TOKEN         = New(FUNCTION)
 	RETURN_TOKEN           = New(RETURN)
@@ -89,6 +92,8 @@ var SingleCharacterTokens = map[string]Token{
 	RIGHT_PARENTHESIS: New(RIGHT_PARENTHESIS),
 	LEFT_BRACE:        LEFT_BRACE_TOKEN,
 	RIGHT_BRACE:       New(RIGHT_BRACE),
+	LEFT_BRACKET:      LEFT_BRACKET_TOKEN,
+	RIGHT_BRACKET:     New(RIGHT_BRACKET),
 }
 
 var TwoCharacterTokens = map[string]Token{

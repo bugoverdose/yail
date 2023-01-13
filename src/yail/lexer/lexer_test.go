@@ -163,19 +163,17 @@ func TestFunctionExpression(t *testing.T) {
 }
 
 func TestSingleCharacterToken(t *testing.T) {
-	input := `!true;
-              1 + (2 - 3) * 10 / 2 % 3;
-			  -10 < 5;
-			  5 > 10;`
+	input := `[!true, 1 + (2 - 3) * 10 / 2 % 3, -10 < 5, 5 > 10];`
 	lexer := New(input)
 
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
+		{token.LEFT_BRACKET, "["},
 		{token.NOT, "!"},
 		{token.TRUE, "true"},
-		{token.SEMICOLON, ";"},
+		{token.COMMA, ","},
 
 		{token.INTEGER, "1"},
 		{token.PLUS, "+"},
@@ -190,17 +188,18 @@ func TestSingleCharacterToken(t *testing.T) {
 		{token.INTEGER, "2"},
 		{token.MODULO, "%"},
 		{token.INTEGER, "3"},
-		{token.SEMICOLON, ";"},
+		{token.COMMA, ","},
 
 		{token.MINUS, "-"},
 		{token.INTEGER, "10"},
 		{token.LESS_THAN, "<"},
 		{token.INTEGER, "5"},
-		{token.SEMICOLON, ";"},
+		{token.COMMA, ","},
 
 		{token.INTEGER, "5"},
 		{token.GREATER_THAN, ">"},
 		{token.INTEGER, "10"},
+		{token.RIGHT_BRACKET, "]"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

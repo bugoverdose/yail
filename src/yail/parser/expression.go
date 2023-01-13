@@ -15,6 +15,7 @@ const (
 	PROD_DIV_PRIORITY
 	PREFIX_PRIORITY
 	FUNCTION_CALL_PRIORITY
+	ARRAY_INDEX_ACCESS_PRIORITY
 )
 
 var priorities = map[token.TokenType]int{
@@ -30,6 +31,7 @@ var priorities = map[token.TokenType]int{
 	token.LESS_OR_EQUAL:    EQUALS_PRIORITY,
 	token.GREATER_OR_EQUAL: EQUALS_PRIORITY,
 	token.LEFT_PARENTHESIS: FUNCTION_CALL_PRIORITY,
+	token.LEFT_BRACKET:     ARRAY_INDEX_ACCESS_PRIORITY,
 }
 
 type (
@@ -50,6 +52,7 @@ func (p *Parser) initNullDenotations() {
 		token.LEFT_PARENTHESIS: parseGroupedExpression,
 		token.IF:               parseIfExpression,
 		token.FUNCTION:         parseFunctionLiteral,
+		token.LEFT_BRACKET:     parseArrayLiteral,
 	}
 }
 
@@ -67,6 +70,7 @@ func (p *Parser) initLeftDenotations() {
 		token.LESS_OR_EQUAL:    parseInfixExpression,
 		token.GREATER_OR_EQUAL: parseInfixExpression,
 		token.LEFT_PARENTHESIS: parseCallExpression, // function call: identifier(parameters)
+		token.LEFT_BRACKET:     parseIndexExpression,
 	}
 }
 
@@ -224,25 +228,40 @@ func parseCallExpression(function ast.Expression, p *Parser) ast.Expression {
 		msg := fmt.Sprintf("unsupported operation : %s(", functionIdentifier.Value)
 		p.errors = append(p.errors, msg)
 	}
-	p.nextToken()
-	if p.curTokenIs(token.RIGHT_PARENTHESIS) {
-		return ast.NewFunctionCall(functionIdentifier, []ast.Expression{})
-	}
-	return ast.NewFunctionCall(functionIdentifier, parseCallArguments(p))
+	args := parseElements(token.RIGHT_PARENTHESIS, p)
+	return ast.NewFunctionCall(functionIdentifier, args)
 }
 
-func parseCallArguments(p *Parser) []ast.Expression {
-	var args []ast.Expression
-	args = append(args, p.parseExpression(NO_PRIORITY))
+func parseArrayLiteral(p *Parser) ast.Expression {
+	elements := parseElements(token.RIGHT_BRACKET, p)
+	return ast.NewArrayLiteral(elements)
+}
+
+func parseIndexExpression(left ast.Expression, p *Parser) ast.Expression {
+	p.nextToken()
+	index := p.parseExpression(NO_PRIORITY)
+	if !p.nextTokenAndValidate(token.RIGHT_BRACKET) {
+		return nil
+	}
+	return ast.NewIndexAccess(left, index)
+}
+
+func parseElements(end token.TokenType, p *Parser) []ast.Expression {
+	var elements []ast.Expression
+	p.nextToken()
+	if p.curTokenIs(end) {
+		return []ast.Expression{}
+	}
+	elements = append(elements, p.parseExpression(NO_PRIORITY))
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
-		args = append(args, p.parseExpression(NO_PRIORITY))
+		elements = append(elements, p.parseExpression(NO_PRIORITY))
 	}
-	if !p.nextTokenAndValidate(token.RIGHT_PARENTHESIS) {
+	if !p.nextTokenAndValidate(end) {
 		return nil
 	}
-	return args
+	return elements
 }
 
 func parseInfixExpression(leftNode ast.Expression, p *Parser) ast.Expression {

@@ -28,6 +28,10 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 		return environment.NewFunction(node, env)
 	case *ast.CallExpression:
 		return evalFunctionCall(node, env)
+	case *ast.ArrayLiteral:
+		return evalArrayLiteral(node, env)
+	case *ast.IndexAccessExpression:
+		return evalIndexAccess(node, env)
 	}
 	return nil
 }

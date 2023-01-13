@@ -228,6 +228,41 @@ func TestClosures(t *testing.T) {
 	testObject(t, testEval(input), 7)
 }
 
+func TestArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(result.Elements), 3, t)
+	testObject(t, result.Elements[0], 1)
+	testObject(t, result.Elements[1], 4)
+	testObject(t, result.Elements[2], 6)
+}
+
+func TestArrayIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"[1, 2, 3][0]", 1},
+		{"[1, 2, 3][1]", 2},
+		{"[1, 2, 3][2]", 3},
+		{"val i = 0; [1][i];", 1},
+		{"[1, 2, 3][1 + 1];", 3},
+		{"val arr = [1, 2, 3]; arr[2];", 3},
+		{"val arr = [1, 2, 3]; arr[0] + arr[1] + arr[2];", 6},
+		{"val arr = [1, 2, 3]; val i = arr[0]; arr[i]", 2},
+		{"[1, 2, 3][3]", nil},
+		{"[1, 2, 3][-1]", nil},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestEvalBuiltinFunction(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -285,10 +320,13 @@ func TestErrorHandling(t *testing.T) {
 			"unknown operator: STRING - STRING",
 		},
 		{
+			`[1, 2, 3]["wrong_index_format"];`,
+			"unsupported operation: ARRAY[STRING]",
+		},
+		{
 			`len(1)`,
 			"len(INTEGER) not supported",
 		},
-
 		{
 			`len("one", "two")`,
 			"wrong number of arguments: expected 1, but received 2",

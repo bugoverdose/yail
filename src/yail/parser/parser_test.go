@@ -263,6 +263,24 @@ func TestFunctionParameters(t *testing.T) {
 	}
 }
 
+func TestEmptyFunctionCallExpression(t *testing.T) {
+	input := "add();"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	utils.ValidateValue(len(program.Statements), 1, t)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	utils.ValidateValue(ok, true, t)
+
+	exp, ok := stmt.Expression.(*ast.CallExpression)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(exp.Function.String(), "add", t)
+	utils.ValidateValue(len(exp.Arguments), 0, t)
+}
+
 func TestFunctionCallExpression(t *testing.T) {
 	input := "add(1, 2 * 3, 4 + 5);"
 
@@ -282,6 +300,52 @@ func TestFunctionCallExpression(t *testing.T) {
 	testLiteralExpression(t, exp.Arguments[0], 1)
 	testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
 	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
+}
+
+func TestParsingEmptyArrayLiterals(t *testing.T) {
+	input := "[];"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(array.Elements), 0, t)
+}
+
+func TestParsingArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3];"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(array.Elements), 3, t)
+	testIntegerLiteral(t, array.Elements[0], 1)
+	testInfixExpression(t, array.Elements[1], 2, "*", 2)
+	testInfixExpression(t, array.Elements[2], 3, "+", 3)
+}
+
+func TestParsingIndexExpressions(t *testing.T) {
+	input := "arr[1 + 1]"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	indexExp, ok := stmt.Expression.(*ast.IndexAccessExpression)
+	utils.ValidateValue(ok, true, t)
+
+	testIdentifier(t, indexExp.Left, "arr")
+	testInfixExpression(t, indexExp.Index, 1, "+", 1)
 }
 
 func TestOperationPriorities(t *testing.T) {
@@ -384,6 +448,14 @@ func TestOperationPriorities(t *testing.T) {
 		{
 			"add(a + b + c * d / f + g)",
 			"add((((a + b) + ((c * d) / f)) + g));",
+		},
+		{
+			"a * [1, 2, 3, 4][b * c] * d",
+			"((a * ([1, 2, 3, 4][(b * c)])) * d);",
+		},
+		{
+			"add(a * b[2], b[1], 2 * [1, 2][1])",
+			"add((a * (b[2])), (b[1]), (2 * ([1, 2][1])));",
 		},
 	}
 

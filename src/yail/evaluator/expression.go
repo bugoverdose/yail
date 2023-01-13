@@ -30,8 +30,10 @@ func evalExpression(node ast.Expression, env *environment.Environment) object.Ob
 		return evalFunctionCall(node, env)
 	case *ast.ArrayLiteral:
 		return evalArrayLiteral(node, env)
-	case *ast.IndexAccessExpression:
-		return evalIndexAccess(node, env)
+	case *ast.HashMapLiteral:
+		return evalHashMapLiteral(node, env)
+	case *ast.CollectionAccessExpression:
+		return evalCollectionAccess(node, env)
 	}
 	return nil
 }

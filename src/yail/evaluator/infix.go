@@ -68,7 +68,7 @@ func evalStringInfixExpression(infixToken token.Token, left, right object.Object
 	rightVal := right.(*object.String).Value
 	switch infixToken.Literal {
 	case token.PLUS:
-		return &object.String{Value: leftVal + rightVal}
+		return object.NewString(leftVal + rightVal)
 	case token.EQUAL:
 		return object.GetPooledBooleanObject(left == right)
 	case token.NOT_EQUAL:

@@ -271,21 +271,85 @@ func TestParsingArrayLiterals(t *testing.T) {
 	array, ok := stmt.Expression.(*ast.ArrayLiteral)
 	utils.ValidateValue(ok, true, t)
 	utils.ValidateValue(len(array.Elements), 3, t)
-	testIntegerLiteral(t, array.Elements[0], 1)
+	testLiteralExpression(t, array.Elements[0], 1)
 	testInfixExpression(t, array.Elements[1], 2, "*", 2)
 	testInfixExpression(t, array.Elements[2], 3, "+", 3)
 }
 
-func TestParsingIndexExpressions(t *testing.T) {
+func TestParsingAccessingArrayByIndexExpressions(t *testing.T) {
 	input := "arr[1 + 1]"
 	program := parseAndValidate(t, input)
 
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	indexExp, ok := stmt.Expression.(*ast.IndexAccessExpression)
+	indexExp, ok := stmt.Expression.(*ast.CollectionAccessExpression)
 	utils.ValidateValue(ok, true, t)
 
-	testIdentifier(t, indexExp.Left, "arr")
+	testLiteralExpression(t, indexExp.Left, "arr")
 	testInfixExpression(t, indexExp.Index, 1, "+", 1)
+}
+
+func TestParsingEmptyHashLiteral(t *testing.T) {
+	input := "{}"
+	program := parseAndValidate(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	hash, ok := stmt.Expression.(*ast.HashMapLiteral)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(hash.Pairs), 0, t)
+}
+
+func TestParsingHashLiteralKeys(t *testing.T) {
+	input := `{"one": 1, "two": 2, true: 10, false: 20, 1: 100, 2: 200}`
+	expected := map[interface{}]int64{
+		"one": 1,
+		"two": 2,
+		true:  10,
+		false: 20,
+		1:     100,
+		2:     200,
+	}
+	program := parseAndValidate(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	hash, ok := stmt.Expression.(*ast.HashMapLiteral)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(hash.Pairs), len(expected), t)
+	for key, value := range hash.Pairs {
+		switch k := key.(type) {
+		case *ast.StringLiteralExpression:
+			testLiteralExpression(t, value, expected[k.Value])
+		case *ast.BooleanExpression:
+			testLiteralExpression(t, value, expected[k.Value])
+		case *ast.IntegerLiteralExpression:
+			testLiteralExpression(t, value, expected[int(k.Value)])
+		}
+	}
+}
+
+func TestParsingHashLiteralValues(t *testing.T) {
+	input := `{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}`
+	hashTests := map[string]struct {
+		leftValue  interface{}
+		operator   string
+		rightValue interface{}
+	}{
+		"one":   {0, "+", 1},
+		"two":   {10, "-", 8},
+		"three": {15, "/", 5},
+	}
+	program := parseAndValidate(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	hash, ok := stmt.Expression.(*ast.HashMapLiteral)
+
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(hash.Pairs), len(hashTests), t)
+	for key, value := range hash.Pairs {
+		literal, ok := key.(*ast.StringLiteralExpression)
+		utils.ValidateValue(ok, true, t)
+		tt := hashTests[literal.Value]
+		testInfixExpression(t, value, tt.leftValue, tt.operator, tt.rightValue)
+	}
 }
 
 func TestOperationPriorities(t *testing.T) {

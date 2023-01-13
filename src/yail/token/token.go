@@ -27,6 +27,7 @@ const (
 
 	// Delimiters
 	COMMA             = ","
+	COLON             = ":"
 	SEMICOLON         = ";"
 	LEFT_PARENTHESIS  = "("
 	RIGHT_PARENTHESIS = ")"
@@ -87,6 +88,7 @@ var SingleCharacterTokens = map[string]Token{
 	LESS_THAN:         New(LESS_THAN),
 	GREATER_THAN:      New(GREATER_THAN),
 	COMMA:             New(COMMA),
+	COLON:             New(COLON),
 	SEMICOLON:         New(SEMICOLON),
 	LEFT_PARENTHESIS:  LEFT_PARENTHESIS_TOKEN,
 	RIGHT_PARENTHESIS: New(RIGHT_PARENTHESIS),

@@ -262,6 +262,56 @@ func TestArrayIndexExpressions(t *testing.T) {
 		testObject(t, evaluated, tt.expected)
 	}
 }
+func TestHashMapLiterals(t *testing.T) {
+	input := `val two = "two";
+	{
+		"one": 10 - 9,
+		two: 1 + 1,
+		"thr" + "ee": 6 / 2,
+		4: 4,
+		true: 5,
+		false: 6
+	}`
+	expected := map[object.HashKey]int64{
+		object.NewString("one").HashKey():   1,
+		object.NewString("two").HashKey():   2,
+		object.NewString("three").HashKey(): 3,
+		object.NewInteger(4).HashKey():      4,
+		object.TRUE.HashKey():               5,
+		object.FALSE.HashKey():              6,
+	}
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.HashMap)
+	utils.ValidateValue(ok, true, t)
+	utils.ValidateValue(len(result.Pairs), len(expected), t)
+
+	for expectedKey, expectedValue := range expected {
+		pair, ok := result.Pairs[expectedKey]
+		utils.ValidateValue(ok, true, t)
+		testObject(t, pair.Value, expectedValue)
+	}
+}
+
+func TestHashMapAccessExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`{"foo": 5}["foo"]`, 5},
+		{`val key = "foo"; {"foo": 5}[key]`, 5},
+		{`{"foo": 5}["bar"]`, nil},
+		{`{}["foo"]`, nil},
+		{`{5: 5}[5]`, 5},
+		{`{true: 5}[true]`, 5},
+		{`{false: 5}[false]`, 5},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testObject(t, evaluated, tt.expected)
+	}
+}
 
 func TestEvalBuiltinFunction(t *testing.T) {
 	tests := []struct {
@@ -331,6 +381,10 @@ func TestErrorHandling(t *testing.T) {
 		{
 			`[1, 2, 3]["wrong_index_format"];`,
 			"unsupported operation: ARRAY[STRING]",
+		},
+		{
+			`{"key": "abc"}[func(x) {x}];`,
+			"unusable as hash key: FUNCTION",
 		},
 		{
 			`len(1)`,

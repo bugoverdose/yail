@@ -5,12 +5,13 @@ import "fmt"
 const BOOLEAN_OBJ = "BOOLEAN"
 
 var (
-	TRUE  = &Boolean{Value: true}
-	FALSE = &Boolean{Value: false}
+	TRUE  = &Boolean{Value: true, hashKey: HashKey{Type: BOOLEAN_OBJ, Value: 1}}
+	FALSE = &Boolean{Value: false, hashKey: HashKey{Type: BOOLEAN_OBJ, Value: 0}}
 )
 
 type Boolean struct {
-	Value bool
+	Value   bool
+	hashKey HashKey
 }
 
 func GetPooledBooleanObject(input bool) *Boolean {
@@ -26,4 +27,8 @@ func (b *Boolean) Type() ObjectType {
 
 func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
+}
+
+func (b *Boolean) HashKey() HashKey {
+	return b.hashKey
 }

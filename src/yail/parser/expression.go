@@ -15,7 +15,7 @@ const (
 	PROD_DIV_PRIORITY
 	PREFIX_PRIORITY
 	FUNCTION_CALL_PRIORITY
-	ARRAY_INDEX_ACCESS_PRIORITY
+	COLLECTION_ACCESS_PRIORITY
 )
 
 var priorities = map[token.TokenType]int{
@@ -31,7 +31,7 @@ var priorities = map[token.TokenType]int{
 	token.LESS_OR_EQUAL:    EQUALS_PRIORITY,
 	token.GREATER_OR_EQUAL: EQUALS_PRIORITY,
 	token.LEFT_PARENTHESIS: FUNCTION_CALL_PRIORITY,
-	token.LEFT_BRACKET:     ARRAY_INDEX_ACCESS_PRIORITY,
+	token.LEFT_BRACKET:     COLLECTION_ACCESS_PRIORITY,
 }
 
 type (
@@ -53,6 +53,7 @@ func (p *Parser) initNullDenotations() {
 		token.IF:               parseIfExpression,
 		token.FUNCTION:         parseFunctionLiteral,
 		token.LEFT_BRACKET:     parseArrayLiteral,
+		token.LEFT_BRACE:       parseHashLiteral,
 	}
 }
 
@@ -243,7 +244,7 @@ func parseIndexExpression(left ast.Expression, p *Parser) ast.Expression {
 	if !p.nextTokenAndValidate(token.RIGHT_BRACKET) {
 		return nil
 	}
-	return ast.NewIndexAccess(left, index)
+	return ast.NewCollectionAccess(left, index)
 }
 
 func parseElements(end token.TokenType, p *Parser) []ast.Expression {
@@ -262,6 +263,27 @@ func parseElements(end token.TokenType, p *Parser) []ast.Expression {
 		return nil
 	}
 	return elements
+}
+
+func parseHashLiteral(p *Parser) ast.Expression {
+	pairs := make(map[ast.Expression]ast.Expression)
+	for !p.peekTokenIs(token.RIGHT_BRACE) {
+		p.nextToken()
+		key := p.parseExpression(NO_PRIORITY)
+		if !p.nextTokenAndValidate(token.COLON) {
+			return nil
+		}
+		p.nextToken()
+		value := p.parseExpression(NO_PRIORITY)
+		pairs[key] = value
+		if !p.peekTokenIs(token.RIGHT_BRACE) && !p.nextTokenAndValidate(token.COMMA) {
+			return nil
+		}
+	}
+	if !p.nextTokenAndValidate(token.RIGHT_BRACE) {
+		return nil
+	}
+	return ast.NewHashMapLiteral(pairs)
 }
 
 func parseInfixExpression(leftNode ast.Expression, p *Parser) ast.Expression {

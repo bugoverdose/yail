@@ -34,30 +34,58 @@ func (al *ArrayLiteral) String() string {
 	return out.String()
 }
 
-type IndexAccessExpression struct {
+type HashMapLiteral struct {
+	Token token.Token
+	Pairs map[Expression]Expression
+}
+
+func NewHashMapLiteral(pairs map[Expression]Expression) *HashMapLiteral {
+	return &HashMapLiteral{
+		Token: token.LEFT_BRACE_TOKEN,
+		Pairs: pairs,
+	}
+}
+
+func (hl *HashMapLiteral) expressionNode() {}
+func (hl *HashMapLiteral) TokenLiteral() string {
+	return hl.Token.Literal
+}
+func (hl *HashMapLiteral) String() string {
+	var out bytes.Buffer
+	var pairs []string
+	for key, value := range hl.Pairs {
+		pairs = append(pairs, key.String()+":"+value.String())
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+type CollectionAccessExpression struct {
 	Token token.Token
 	Left  Expression
 	Index Expression
 }
 
-func NewIndexAccess(left, index Expression) *IndexAccessExpression {
-	return &IndexAccessExpression{
+func NewCollectionAccess(left, index Expression) *CollectionAccessExpression {
+	return &CollectionAccessExpression{
 		Token: token.LEFT_BRACKET_TOKEN,
 		Left:  left,
 		Index: index,
 	}
 }
 
-func (ie *IndexAccessExpression) expressionNode() {}
-func (ie *IndexAccessExpression) TokenLiteral() string {
-	return ie.Token.Literal
+func (c *CollectionAccessExpression) expressionNode() {}
+func (c *CollectionAccessExpression) TokenLiteral() string {
+	return c.Token.Literal
 }
-func (ie *IndexAccessExpression) String() string {
+func (c *CollectionAccessExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("(")
-	out.WriteString(ie.Left.String())
+	out.WriteString(c.Left.String())
 	out.WriteString("[")
-	out.WriteString(ie.Index.String())
+	out.WriteString(c.Index.String())
 	out.WriteString("])")
 	return out.String()
 }

@@ -22,11 +22,7 @@ func TestVariableBindingStatement(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt := program.Statements[0]
 		testVariableBindingStatement(t, stmt, tt.expectedIdentifier)
@@ -47,11 +43,7 @@ func TestReturnStatement(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt := program.Statements[0]
 		returnStmt, ok := stmt.(*ast.ReturnStatement)
@@ -71,11 +63,7 @@ func TestBooleanExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
@@ -87,11 +75,7 @@ func TestBooleanExpression(t *testing.T) {
 
 func TestStringExpression(t *testing.T) {
 	input := `"hello world";`
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
+	program := parseAndValidate(t, input)
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(len(program.Statements), 1, t)
@@ -115,11 +99,7 @@ func TestPrefixExpression(t *testing.T) {
 	}
 
 	for _, tt := range prefixTests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
@@ -150,11 +130,7 @@ func TestInfixExpression(t *testing.T) {
 	}
 
 	for _, tt := range infixTests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		utils.ValidateValue(len(program.Statements), 1, t)
 		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		utils.ValidateValue(ok, true, t)
@@ -164,11 +140,7 @@ func TestInfixExpression(t *testing.T) {
 
 func TestIfExpression(t *testing.T) {
 	input := `if (x < y) { x }`
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
+	program := parseAndValidate(t, input)
 
 	utils.ValidateValue(len(program.Statements), 1, t)
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
@@ -188,11 +160,7 @@ func TestIfExpression(t *testing.T) {
 
 func TestIfElseExpression(t *testing.T) {
 	input := `if (x < y) { return x; } else { y }`
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
+	program := parseAndValidate(t, input)
 
 	utils.ValidateValue(len(program.Statements), 1, t)
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
@@ -215,11 +183,7 @@ func TestIfElseExpression(t *testing.T) {
 
 func TestFunctionLiteral(t *testing.T) {
 	input := `func(x, y) { x + y; }`
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
+	program := parseAndValidate(t, input)
 
 	utils.ValidateValue(len(program.Statements), 1, t)
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
@@ -249,11 +213,7 @@ func TestFunctionParameters(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		stmt := program.Statements[0].(*ast.ExpressionStatement)
 		function := stmt.Expression.(*ast.FunctionLiteral)
 		utils.ValidateValue(len(function.Parameters), len(tt.expectedParams), t)
@@ -266,11 +226,7 @@ func TestFunctionParameters(t *testing.T) {
 func TestEmptyFunctionCallExpression(t *testing.T) {
 	input := "add();"
 
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
-
+	program := parseAndValidate(t, input)
 	utils.ValidateValue(len(program.Statements), 1, t)
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
@@ -284,11 +240,7 @@ func TestEmptyFunctionCallExpression(t *testing.T) {
 func TestFunctionCallExpression(t *testing.T) {
 	input := "add(1, 2 * 3, 4 + 5);"
 
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
-
+	program := parseAndValidate(t, input)
 	utils.ValidateValue(len(program.Statements), 1, t)
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	utils.ValidateValue(ok, true, t)
@@ -304,11 +256,7 @@ func TestFunctionCallExpression(t *testing.T) {
 
 func TestParsingEmptyArrayLiterals(t *testing.T) {
 	input := "[];"
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
-
+	program := parseAndValidate(t, input)
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	array, ok := stmt.Expression.(*ast.ArrayLiteral)
 	utils.ValidateValue(ok, true, t)
@@ -317,11 +265,7 @@ func TestParsingEmptyArrayLiterals(t *testing.T) {
 
 func TestParsingArrayLiterals(t *testing.T) {
 	input := "[1, 2 * 2, 3 + 3];"
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
+	program := parseAndValidate(t, input)
 
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	array, ok := stmt.Expression.(*ast.ArrayLiteral)
@@ -334,11 +278,7 @@ func TestParsingArrayLiterals(t *testing.T) {
 
 func TestParsingIndexExpressions(t *testing.T) {
 	input := "arr[1 + 1]"
-
-	l := lexer.New(input)
-	p := New(l)
-	program := p.ParseProgram()
-	validateNoParserErrors(t, p)
+	program := parseAndValidate(t, input)
 
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	indexExp, ok := stmt.Expression.(*ast.IndexAccessExpression)
@@ -460,11 +400,7 @@ func TestOperationPriorities(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program := p.ParseProgram()
-		validateNoParserErrors(t, p)
-
+		program := parseAndValidate(t, tt.input)
 		actual := program.String()
 		utils.ValidateValue(actual, tt.expected, t)
 	}
@@ -504,6 +440,14 @@ func validateNoParserErrors(t *testing.T, p *Parser) {
 		t.Errorf("parser error: %q", msg)
 	}
 	t.FailNow()
+}
+
+func parseAndValidate(t *testing.T, input string) *ast.Program {
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	validateNoParserErrors(t, p)
+	return program
 }
 
 func testVariableBindingStatement(t *testing.T, s ast.Statement, identifier string) {

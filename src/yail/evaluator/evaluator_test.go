@@ -298,13 +298,12 @@ func TestHashMapAccessExpressions(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`{"foo": 5}["foo"]`, 5},
-		{`val key = "foo"; {"foo": 5}[key]`, 5},
 		{`{"foo": 5}["bar"]`, nil},
 		{`{}["foo"]`, nil},
-		{`{5: 5}[5]`, 5},
-		{`{true: 5}[true]`, 5},
-		{`{false: 5}[false]`, 5},
+		{`{"foo": 5}["foo"]`, 5},
+		{`val key = "foo"; {"foo": 5}[key]`, 5},
+		{`{100: { "a": 1, "b": 2 }}[100]["a"]`, 1},
+		{`{true: [10, 20, 30]}[true][0]`, 10},
 	}
 
 	for _, tt := range tests {

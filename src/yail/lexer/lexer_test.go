@@ -7,7 +7,7 @@ import (
 )
 
 func TestLiteral(t *testing.T) {
-	input := `5; b; true; "abc"; ""; null;`
+	input := `5; b; true; "abc123#$%^"; ""; null;`
 	lexer := New(input)
 
 	tests := []struct {
@@ -23,7 +23,7 @@ func TestLiteral(t *testing.T) {
 		{token.TRUE, "true"},
 		{token.SEMICOLON, ";"},
 
-		{token.STRING, "abc"},
+		{token.STRING, "abc123#$%^"},
 		{token.SEMICOLON, ";"},
 
 		{token.STRING, ""},

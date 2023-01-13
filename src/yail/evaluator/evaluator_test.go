@@ -266,11 +266,20 @@ func TestArrayIndexExpressions(t *testing.T) {
 func TestEvalBuiltinFunction(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected interface{}
 	}{
 		{`len("")`, 0},
-		{`len("four")`, 4},
 		{`len("Hello World")`, 11},
+		{`len([])`, 0},
+		{`len(["a", "b"])`, 2},
+		{`head([1, 2, 3])`, 1},
+		{`head([])`, nil},
+		{`tail([1, 2, 3])`, 3},
+		{`tail([])`, nil},
+		{`val arr = [1, 2, 3]; push(arr, 10); arr;`, []int64{1, 2, 3, 10}},
+		{`val arr = [1, 2, 3]; pushleft(arr, 10); arr;`, []int64{10, 1, 2, 3}},
+		{`val arr = [1, 2, 3]; pop(arr); arr;`, []int64{1, 2}},
+		{`val arr = [1, 2, 3]; popleft(arr); arr;`, []int64{2, 3}},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
@@ -362,6 +371,12 @@ func testObject(
 		utils.ValidateObject(actual, object.NewInteger(v), t)
 	case bool:
 		utils.ValidateObject(actual, object.GetPooledBooleanObject(v), t)
+	case []int64:
+		actual := actual.(*object.Array).Elements
+		utils.ValidateValue(len(actual), len(v), t)
+		for idx, val := range actual {
+			utils.ValidateValue(val.(*object.Integer).Value, v[idx], t)
+		}
 	case nil:
 		utils.ValidateObject(actual, object.NULL, t)
 	default:

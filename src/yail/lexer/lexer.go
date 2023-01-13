@@ -2,7 +2,10 @@ package lexer
 
 import "yail/token"
 
-const EOF_CHAR = 0
+const (
+	EOF_CHAR         = 0
+	STRING_DELIMITER = '"'
+)
 
 type Lexer struct {
 	sourceCode   string
@@ -28,7 +31,7 @@ func (lexer *Lexer) NextToken() token.Token {
 	if IsDigit(lexer.curChar) {
 		return token.NewInteger(lexer.readNumber())
 	}
-	if lexer.curChar == '"' {
+	if lexer.curChar == STRING_DELIMITER {
 		return lexer.readString()
 	}
 	return lexer.toSpecialCharacterToken()
@@ -96,7 +99,7 @@ func (lexer *Lexer) readString() token.Token {
 	startPosition := lexer.curPosition + 1
 	for {
 		lexer.readNextChar()
-		if lexer.curChar == '"' || lexer.curChar == EOF_CHAR {
+		if lexer.curChar == STRING_DELIMITER || lexer.curChar == EOF_CHAR {
 			lexer.readNextChar()
 			break
 		}

@@ -3,3 +3,5 @@ src/yail/yail
 
 # Goland
 .idea/
+src/yail/go/
+go/
